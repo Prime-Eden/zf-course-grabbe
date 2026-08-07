@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教学管理信息服务平台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei","微软雅黑",sans-serif;background:#eef1f5;color:#333;min-height:100vh}
+.hidden{display:none!important}a{color:#1a73e8;text-decoration:none}
+.topnav{background:#1e3a5f;color:#fff;display:flex;align-items:center;padding:0 20px;height:44px;font-size:14px}
+.topnav .brand{font-weight:700;margin-right:30px;white-space:nowrap}
+.topnav .tabs{display:flex;gap:0;height:100%}
+.topnav .tab{padding:0 18px;height:100%;display:flex;align-items:center;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;color:#b0c4de}
+.topnav .tab:hover{color:#fff}.topnav .tab.act{color:#fff;border-bottom-color:#4da3ff;background:rgba(255,255,255,.08)}
+.topnav .right{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12px}
+.topnav .btn-sm{padding:3px 10px;border:1px solid #4da3ff;color:#4da3ff;background:transparent;border-radius:3px;cursor:pointer;font-size:11px}
+.wrap{max-width:1300px;margin:12px auto;padding:0 12px}
+.login-card{background:#fff;padding:30px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:420px;margin:60px auto}
+.login-card h2{font-size:17px;margin-bottom:16px;color:#1e3a5f}
+.login-card input{width:100%;padding:9px 12px;border:1px solid #d0d0d0;border-radius:3px;font-size:13px;margin-bottom:10px;outline:none}
+.login-card input:focus{border-color:#1a73e8}.login-card .row{display:flex;gap:8px}
+.btn{padding:8px 20px;border:none;border-radius:3px;font-size:13px;cursor:pointer}
+.btn-pri{background:#1a73e8;color:#fff}.btn-red{background:#d93025;color:#fff}.btn-green{background:#188038;color:#fff}
+.btn-out{background:#fff;color:#555;border:1px solid #ccc}.btn:disabled{opacity:.4;cursor:not-allowed}
+.dual{display:grid;grid-template-columns:280px 1fr;gap:12px;min-height:calc(100vh - 110px)}
+.panel{background:#fff;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column}
+.panel-h{padding:10px 14px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;color:#1e3a5f;display:flex;align-items:center;gap:8px}
+.panel-b{padding:10px 14px;flex:1;overflow-y:auto}.panel-f{padding:8px 14px;border-top:1px solid #e8e8e8;display:flex;gap:8px}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12px}
+.set-row label{cursor:pointer;display:flex;align-items:center;gap:6px}
+.task-item{padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px}
+.task-item .t-name{font-weight:500}.task-item .t-meta{color:#888;font-size:11px;margin-top:2px}
+.log-box{background:#1a1a2e;color:#8f8;font-family:Consolas,monospace;font-size:11px;padding:8px 10px;border-radius:3px;max-height:180px;overflow-y:auto;margin-top:6px}
+.filter-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;font-size:12px}
+.filter-bar select,.filter-bar input{padding:4px 6px;border:1px solid #d0d0d0;border-radius:3px;font-size:12px}
+.filter-bar input{width:160px}
+.cat-tabs{display:flex;gap:3px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid #eee}
+.ctab{padding:4px 10px;border-radius:3px;font-size:12px;cursor:pointer;border:1px solid #d0d0d0;background:#fff;white-space:nowrap}
+.ctab.act{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+.course-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;align-items:center}
+.course-item:last-child{border-bottom:none}.c-name{font-weight:500;color:#1a1a1a}
+.c-meta{color:#666;font-size:12px;margin-top:3px;line-height:1.5}.c-meta span{margin-right:12px}
+.c-actions{text-align:right;white-space:nowrap}.c-actions button{padding:4px 12px;border-radius:3px;font-size:12px;cursor:pointer}
+.tag{display:inline-block;padding:1px 6px;border-radius:2px;font-size:11px;margin-right:4px}
+.tag-ok{background:#e6f4ea;color:#188038}.tag-full{background:#fce8e6;color:#d93025}.tag-info{background:#e8f0fe;color:#1a73e8}
+.schedule-table{width:100%;border-collapse:collapse;font-size:12px}
+.schedule-table th,.schedule-table td{border:1px solid #d0d0d0;padding:4px;text-align:center;vertical-align:top}
+.schedule-table th{background:#f0f4f8;font-weight:500;color:#555}
+.schedule-toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #e8e8e8;background:#f8fafc}
+.schedule-select{position:relative}
+.schedule-select summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#fff;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;color:#333;user-select:none}
+.schedule-select summary::-webkit-details-marker{display:none}
+.schedule-select[open] summary{box-shadow:0 0 0 3px rgba(26,115,232,.15);border-color:#1a73e8}
+.schedule-options{position:absolute;top:calc(100% + 6px);left:0;min-width:220px;background:#fff;border:1px solid #e2e6ec;border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.12);padding:8px;z-index:20;display:grid;gap:2px}
+.schedule-options label{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:#333}
+.schedule-options label:hover{background:#f1f5fb}
+.schedule-options input{accent-color:#1a73e8;width:14px;height:14px}
+.course-card{background:#fff;border:1px solid #e8ecf1;border-radius:10px;padding:10px 8px;box-shadow:0 1px 3px rgba(15,23,42,.05);transition:opacity .15s ease-out}
+.course-card.partial{opacity:.55}
+.course-name{font-size:15px;font-weight:600;text-align:center;color:#111;line-height:1.3;word-break:break-word}
+.course-meta{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 8px;font-size:12px;color:#666;text-align:center}
+.course-weeks{margin-top:4px;font-size:11px;color:#8a94a6;text-align:center}
+.field-tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;line-height:1.6;white-space:normal;word-break:break-word}
+.field-time{background:#e3f2fd;color:#1565c0}
+.field-location{background:#e8f5e9;color:#2e7d32}
+.field-teacher{background:#f3e5f5;color:#6a1b9a}
+.field-classNo{background:#e0f7fa;color:#00695c}
+.field-classComp{background:#fff3e0;color:#e65100}
+.field-remark{background:#efebe9;color:#5d4037}
+.field-hoursComp{background:#fce4ec;color:#ad1457}
+.field-weekHours{background:#f1f8e9;color:#558b2f}
+.field-totalHours{background:#e8eaf6;color:#283593}
+.field-exam{background:#fbe9e7;color:#bf360c}
+.field-credit{background:#fff8e1;color:#f9a825}
+.field-teachMode{background:#ede7f6;color:#4527a0}
+.field-nature{background:#eceff1;color:#37474f}
+.empty{text-align:center;color:#bbb;padding:30px;font-size:13px}
+.alert{padding:8px 12px;border-radius:3px;font-size:12px;margin-bottom:8px}
+.alert-err{background:#fce8e6;color:#d93025}
+.exam-page{background:linear-gradient(135deg,#eef2ff 0%,#f3e8ff 55%,#e0e7ff 100%);min-height:calc(100vh - 56px);padding:16px}
+.exam-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.exam-toolbar select{padding:9px 12px;border:1px solid #d8d2f0;border-radius:10px;background:#fff;font-size:13px;outline:none}
+.exam-toolbar select:focus{border-color:#7c6cf0;box-shadow:0 0 0 3px rgba(124,108,240,.15)}
+.exam-btn{padding:9px 18px;border:none;border-radius:10px;background:#6d5bd0;color:#fff;font-size:13px;cursor:pointer;min-height:40px}
+.exam-btn:hover{background:#5a48bd}
+.sem-radios{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sem-radios label{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;background:#fff;border:1px solid #d8d2f0;border-radius:10px;font-size:13px;cursor:pointer}
+.sem-radios input{accent-color:#6d5bd0;width:15px;height:15px}
+.exam-list{display:flex;flex-direction:column;gap:14px;max-width:980px;margin:0 auto}
+.exam-card{position:relative;display:flex;flex-direction:column;gap:10px;background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 4px 18px rgba(90,60,180,.10);border-left:5px solid var(--bar,#7c6cf0);overflow:hidden}
+.exam-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.exam-title{font-size:17px;font-weight:700;color:#2b2350;line-height:1.35}
+.exam-sub{font-size:13px;color:#8b7fd0;margin-top:4px}
+.exam-date{font-size:14px;color:#6d5bd0;font-weight:600;margin-top:4px}
+.exam-status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.exam-status.past{background:#f1f3f5;color:#666}
+.exam-status.today{background:#e7f6ec;color:#1e7d43}
+.exam-status.upcoming{background:#fdf0d8;color:#b7791f}
+.exam-meta{display:flex;flex-wrap:wrap;gap:8px}
+.exam-meta span{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:#f6f4ff;color:#4b3f85;font-size:12px;line-height:1.4}
+.exam-empty{text-align:center;color:#6b5f9e;padding:40px 16px;font-size:14px}
+.ics-section{margin-top:20px;border-top:1px solid #e8ecf1;padding-top:16px}
+.ics-title{font-size:15px;font-weight:700;color:#1e3a5f;margin-bottom:12px}
+.ics-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.ics-card{background:#fff;border:1px solid #e8ecf1;border-radius:10px;padding:10px 8px;box-shadow:0 1px 3px rgba(15,23,42,.05);border-left:4px solid #7c6cf0;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
+.ics-name{font-size:15px;font-weight:600;color:#111;line-height:1.3;word-break:break-word}
+.ics-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+.ics-meta span{font-size:11px;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#4b3f85;line-height:1.6}
+.score-num{font-size:26px;font-weight:800;line-height:1;text-align:center;color:var(--bar,#7c6cf0)}
+.score-grade{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.score-grade.good{background:#e7f6ec;color:#1e7d43}
+.score-grade.mid{background:#fdf0d8;color:#b7791f}
+.score-grade.pass{background:#e8f0fe;color:#1a73e8}
+.score-grade.fail{background:#fce8e6;color:#d93025}
+@media(max-width:640px){.exam-card{padding:14px 14px}.exam-title{font-size:15px}.exam-head{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="topnav" id="topnav" style="display:none">
+<div class="brand">教学管理信息服务平台</div>
+<div class="tabs">
+<div class="tab" data-page="home" draggable="true" onclick="navTo('home')">首页</div>
+<div class="tab act" data-page="xk" draggable="true" onclick="navTo('xk')">选课</div>
+<div class="tab" data-page="kbcx" draggable="true" onclick="navTo('kbcx')">课表查询</div>
+<div class="tab" data-page="cj" draggable="true" onclick="navTo('cj')">成绩查询</div>
+<div class="tab" data-page="ks" draggable="true" onclick="navTo('ks')">考试查询</div>
+</div>
+<div class="right"><span id="hbDot" style="display:none;color:#6f6;font-size:11px">心跳正常</span><span id="navUser"></span><button class="btn-sm" onclick="doLogout()">退出</button></div>
+</div>
+<div id="loginSec" class="login-card">
+<h2>用户登录</h2><div id="loginErr" class="alert alert-err hidden"></div>
+<input type="text" id="uname" placeholder="学号 / 工号" autocomplete="off">
+<input type="password" id="pwd" placeholder="密码" autocomplete="off">
+<div class="row"><button class="btn btn-pri" id="loginBtn" onclick="doLogin()" style="flex:1">登录</button><button class="btn btn-out" onclick="loadSession()">加载会话</button></div>
+<div style="font-size:11px;color:#999;margin-top:8px">密码经加密传输，不保存原始密码。</div>
+</div>
+<div class="wrap hidden" id="mainWrap">
+<div id="page-xk"><div class="dual">
+<div class="panel" style="max-height:calc(100vh - 100px)">
+<div class="panel-h"><span>🚀</span> 自助抢课</div>
+<div class="panel-b">
+<div class="set-row"><label><input type="checkbox" id="keepLogin" checked> 保持登录</label></div>
+<div style="margin:6px 0"><b>当前排队抢课</b></div>
+<div id="taskList"><div class="empty">暂未添加课程</div></div>
+<div style="margin:6px 0"><b>日志查看</b></div>
+<div class="log-box" id="logBox"><div>等待任务启动...</div></div>
+</div>
+<div class="panel-f"><button class="btn btn-green" id="startBtn" onclick="startMon()" style="flex:1">开始自助抢课</button><button class="btn btn-red" id="stopBtn" onclick="stopMon()" disabled>停止</button></div>
+</div>
+<div class="panel" style="max-height:calc(100vh - 100px)">
+<div class="panel-h"><span>📚</span> 板块课<span style="font-weight:400;font-size:11px;color:#888;margin-left:8px" id="catLabel">全部课程</span></div>
+<div class="panel-b">
+<div class="filter-bar">
+<input type="text" id="searchKw" placeholder="课程名/教师/编号" onkeydown="if(event.key==='Enter')doSearch()">
+<button class="btn btn-pri" onclick="doSearch()" style="padding:4px 10px;font-size:12px">检索</button>
+</div>
+<div class="cat-tabs" id="catTabs"></div>
+<div id="searchRes" style="margin-top:8px"></div>
+</div>
+</div>
+</div></div>
+<div id="page-kbcx" class="hidden"><div class="panel">
+<div class="panel-h"><span>📅</span> 课表查询
+<select id="kbXn" onchange="loadSchedule()"><option value="2025">2025-2026</option><option value="2026" selected>2026-2027</option><option value="2027">2027-2028</option><option value="2028">2028-2029</option></select>
+<span class="sem-radios"><label><input type="radio" name="kbXq" value="1" checked onchange="loadSchedule()"> 第1学期</label><label><input type="radio" name="kbXq" value="2" onchange="loadSchedule()"> 第2学期</label></span>
+</div>
+<div class="schedule-toolbar">
+<details class="schedule-select" id="fieldFilter">
+<summary>显示字段</summary>
+<div class="schedule-options">
+<label><input type="checkbox" class="fld" value="time"> 时间</label>
+<label><input type="checkbox" class="fld" value="location" checked> 地点</label>
+<label><input type="checkbox" class="fld" value="teacher" checked> 教师</label>
+<label><input type="checkbox" class="fld" value="classNo"> 教学班</label>
+<label><input type="checkbox" class="fld" value="classComp"> 教学班组成</label>
+<label><input type="checkbox" class="fld" value="remark"> 选课备注</label>
+<label><input type="checkbox" class="fld" value="hoursComp"> 课程学时组成</label>
+<label><input type="checkbox" class="fld" value="weekHours"> 周学时</label>
+<label><input type="checkbox" class="fld" value="totalHours"> 总学时</label>
+<label><input type="checkbox" class="fld" value="exam"> 考核方式</label>
+<label><input type="checkbox" class="fld" value="credit"> 学分</label>
+<label><input type="checkbox" class="fld" value="teachMode"> 授课方式名称</label>
+<label><input type="checkbox" class="fld" value="nature"> 课程性质</label>
+</div>
+</details>
+<span style="font-size:11px;color:#888">勾选要显示的课程信息，表格自动更新</span>
+</div>
+<div class="panel-b"><div id="scheduleContent"><div class="empty">请选择学年学期加载课表</div></div></div>
+</div></div>
+<div id="page-home" class="hidden"><div class="panel"><div class="panel-b"><div class="empty">首页 - 待开发</div></div></div></div>
+<div id="page-cj" class="hidden"><div class="exam-page">
+<div class="exam-toolbar">
+<select id="scXn" onchange="loadScores()"><option value="2025" selected>2025-2026</option><option value="2026">2026-2027</option><option value="2027">2027-2028</option><option value="2028">2028-2029</option></select>
+<span class="sem-radios"><label><input type="radio" name="scXq" value="3" onchange="loadScores()"> 第1学期</label><label><input type="radio" name="scXq" value="12" checked onchange="loadScores()"> 第2学期</label></span>
+<button class="exam-btn" onclick="loadScores()">📊 查询成绩</button>
+</div>
+<div class="exam-list" id="scoreList"><div class="exam-empty">📊 暂无成绩</div></div>
+</div></div>
+<div id="page-ks" class="hidden"><div class="exam-page">
+<div class="exam-toolbar">
+<select id="exXn" onchange="loadExams()"><option value="2025">2025-2026</option><option value="2026" selected>2026-2027</option><option value="2027">2027-2028</option><option value="2028">2028-2029</option></select>
+<span class="sem-radios"><label><input type="radio" name="exXq" value="3" onchange="loadExams()"> 第1学期</label><label><input type="radio" name="exXq" value="12" checked onchange="loadExams()"> 第2学期</label></span>
+<button class="exam-btn" onclick="loadExams()">📅 查询考试</button>
+</div>
+<div class="exam-list" id="examList"><div class="exam-empty">📌 暂无考试安排</div></div>
+</div></div>
+</div>
+<script>
+let loggedIn=false,monitoring=false,activePage='xk',activeKklxdm='',tasks=[],categories=[],pollTimer=null;
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function showErr(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.remove('hidden')}
+async function doLogin(){const u=document.getElementById('uname').value.trim(),p=document.getElementById('pwd').value;if(!u||!p){showErr('请输入学号和密码');return}const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='登录中...';try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(d.ok){loggedIn=true;showMain()}else showErr(d.error||'登录失败')}catch(e){showErr(e.message||'网络错误')}finally{btn.disabled=false;btn.textContent='登录'}}
+async function loadSession(){try{const r=await fetch('/api/session/load',{method:'POST'});const d=await r.json();if(d.ok){loggedIn=true;showMain()}else showErr(d.error||'无可用会话')}catch(e){showErr(e.message||'网络错误')}}
+async function showMain(){document.getElementById('loginSec').classList.add('hidden');document.getElementById('mainWrap').classList.remove('hidden');document.getElementById('topnav').style.display='flex';await loadCategories();navTo('xk');startPoll()}
+function navTo(page){activePage=page;document.querySelectorAll('.topnav .tab').forEach(t=>t.classList.toggle('act',t.dataset.page===page));document.querySelectorAll('[id^="page-"]').forEach(p=>p.classList.add('hidden'));const el=document.getElementById('page-'+page);if(el)el.classList.remove('hidden');if(page==='xk')doSearch();if(page==='kbcx')loadSchedule();if(page==='ks')loadExams();if(page==='cj')loadScores();if(page==='cj')loadScores();if(page==='cj')loadScores()}
+async function doLogout(){try{await fetch('/api/logout',{method:'POST'})}catch(e){}location.reload()}
+function startPoll(){if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(refreshTasks,3000)}
+async function loadCategories(){try{const r=await fetch('/api/categories');const d=await r.json();if(d.ok&&d.categories){categories=d.categories;renderCatTabs()}}catch(e){}}
+function renderCatTabs(){const c=document.getElementById('catTabs');let h='<div class="ctab'+(activeKklxdm?'':' act')+'" onclick="setCat(\'\')">全部</div>';for(const t of categories){h+='<div class="ctab'+(activeKklxdm===t.kklxdm?' act':'')+'" onclick="setCat(\''+esc(t.kklxdm)+'\')">'+esc(t.name)+'</div>'}c.innerHTML=h}
+function setCat(k){activeKklxdm=k;renderCatTabs();document.getElementById('catLabel').textContent=categories.find(c=>c.kklxdm===k)?.name||'全部课程';doSearch()}
+async function doSearch(){const kw=document.getElementById('searchKw').value.trim();try{const r=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,kklxdm:activeKklxdm})});const d=await r.json();renderResults(d.courses||[])}catch(e){}}
+function renderResults(courses){const c=document.getElementById('searchRes');if(!courses.length){c.innerHTML='<div class="empty">暂无课程数据（选课期未开放或接口待适配）</div>';return}c.innerHTML=courses.map(co=>{const cap=parseInt(co.capacity)||0,sel=parseInt(co.selected)||0,rem=Math.max(0,cap-sel);const inQueue=tasks.some(t=>t.course_id===co.id);return'<div class="course-item"><div><div class="c-name">'+esc(co.name)+' <span style="color:#999;font-weight:400;font-size:11px">'+esc(co.id)+'</span></div><div class="c-meta">'+(co.teacher?'<span>教师：'+esc(co.teacher)+'</span>':'')+(co.time?'<span>时间：'+esc(co.time)+'</span>':'')+(co.location?'<span>地点：'+esc(co.location)+'</span>':'')+(co.credit?'<span>学分：'+esc(co.credit)+'</span>':'')+'</div><div class="c-meta"><span class="tag '+(rem>0?'tag-ok':'tag-full')+'">'+(rem>0?'余量 '+rem:'已满')+'</span><span class="tag tag-info">'+sel+'/'+(cap||'?')+'</span></div></div><div class="c-actions">'+(inQueue?'<button class="btn-red" onclick="removeTask(\''+esc(co.id)+'\')" style="padding:4px 8px;font-size:11px">取消抢课</button>':'<button class="btn-pri" onclick="addTask(\''+esc(co.id)+'\',\''+esc(co.name)+'\')" style="padding:4px 8px;font-size:11px">加入抢课</button>')+'</div></div>'}).join('')}
+async function addTask(id,name){if(tasks.length>=10){alert('最多添加 10 个任务');return}try{const r=await fetch('/api/tasks/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_id:id,course_name:name,target_jxb_id:'',interval:2.0,xnm:(document.getElementById('selXn').value||'2026-2027').split('-')[0],xqm:document.getElementById('selXq').value||'1'})});const d=await r.json();if(d.ok){logAdd('加入抢课队列：'+name);await refreshTasks();doSearch()}else alert(d.message||'添加失败')}catch(e){alert(e.message)}}
+async function removeTask(id){try{await fetch('/api/tasks/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_id:id})});logAdd('取消抢课');await refreshTasks();doSearch()}catch(e){}}
+async function refreshTasks(){try{const r=await fetch('/api/tasks');const d=await r.json();if(d.ok){tasks=d.tasks;renderTasks()}}catch(e){}}
+function renderTasks(){const c=document.getElementById('taskList');if(!tasks.length){c.innerHTML='<div class="empty">暂未添加课程</div>';return}c.innerHTML=tasks.map(t=>{const s=t.status==='running'?'监控中':t.status==='success'?'已抢到':'已停止';return'<div class="task-item"><div class="t-name">'+esc(t.course_name||t.name)+'</div><div class="t-meta">'+s+' | 班级 '+esc(t.target_jxb_id||'自动')+' | 尝试'+t.attempts+'次 | '+esc(t.last_msg||'')+'</div><button class="btn-red" onclick="removeTask(\''+esc(t.course_id||t.id)+'\')" style="padding:2px 6px;font-size:10px;margin-top:3px">取消抢课</button></div>'}).join('')}
+function logAdd(msg){const box=document.getElementById('logBox');const ts=new Date().toLocaleTimeString();box.innerHTML+='<div>['+ts+'] '+esc(msg)+'</div>';if(box.children.length>60)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight}
+async function startMon(){try{const r=await fetch('/api/monitor/start',{method:'POST'});const d=await r.json();if(d.ok){monitoring=true;logAdd('自助抢课已启动');updateMonUI()}else alert(d.message||'启动失败')}catch(e){alert(e.message)}}
+async function stopMon(){try{await fetch('/api/monitor/stop',{method:'POST'});monitoring=false;logAdd('自助抢课已停止');updateMonUI()}catch(e){}}
+function updateMonUI(){document.getElementById('startBtn').disabled=monitoring;document.getElementById('stopBtn').disabled=!monitoring}
+let scheduleCache=[];let icsCache=[];
+function scheduleFields(){return Array.from(document.querySelectorAll('#fieldFilter .fld')).filter(function(x){return x.checked}).map(function(x){return x.value})}
+function splitCell(text){text=String(text||'').replace(/浙大城市学院/g,'');const tokens=text.split(/\s+/).filter(Boolean);const out={name:'',time:'',weeks:'',location:'',teacher:'',classNo:'',classComp:'',remark:'',hoursComp:'',weekHours:'',totalHours:'',exam:'',credit:'',teachMode:'',nature:'',partial:false};let plain=0,nums=[];for(const t of tokens){if(/^(?:\([\d-]+节\))?\d+-\d+周/.test(t)){const tm=t.match(/\((\d+-\d+节)\)/);if(tm)out.time=tm[1];const w=t.match(/\d+-\d+周(?:[,，]\d+-\d+周)*/);if(w){out.weeks=w[0];out.partial=/,|，/.test(out.weeks)||/单周|双周|隔周/.test(t)}continue}if(/^[\u4e00-\u9fa5]+$/.test(t)){if(/校内|场地|楼|室/.test(t)){out.location+=(out.location?' · ':'')+t;continue}if(/必修|选修|限选/.test(t)){out.nature=t;continue}if(/考查|考试|实践|论文/.test(t)){out.exam=t;continue}if(/面授|线上|混合|授课/.test(t)){out.teachMode=t;continue}plain++;if(plain===1){out.name=t;continue}if(plain===2){out.teacher=t;continue}continue}if(/教[一二三四五六七八九十\d]?\d+|楼|室|校内|场地/.test(t)){out.location+=(out.location?' · ':'')+t;continue}if(/讲课|实验|上机/.test(t)){out.hoursComp+=(out.hoursComp?' ':'')+t;continue}if(/;/.test(t)){out.classComp=t;continue}if(/^\(/.test(t)){out.classNo=t;continue}if(/^\d+\.\d+$/.test(t)&&!out.credit){out.credit=t;continue}if(/^\d+$/.test(t)){nums.push(t);continue}if(!out.classNo&&/-/.test(t)){out.classNo=t;continue}}if(nums.length>0&&!out.weekHours)out.weekHours=nums[0];if(nums.length>1&&!out.totalHours)out.totalHours=nums[1];return out}
+async function loadSchedule(){const c=document.getElementById('scheduleContent');c.innerHTML='<div class="empty">加载中...</div>';try{const r=await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('kbXn').value,xqm:document.querySelector('input[name="kbXq"]:checked').value})});const d=await r.json();if(!d.ok){c.innerHTML='<div class="empty">'+esc(d.error||'加载失败')+'</div>';return}scheduleCache=d.schedule||[];try{const q=await fetch('/api/schedule-ics');const qd=await q.json();icsCache=qd.courses||[]}catch(e){icsCache=[]}renderSchedule()}catch(e){c.innerHTML='<div class="empty">'+esc(e.message||'网络错误')+'</div>'}}
+function renderSchedule(){const c=document.getElementById('scheduleContent');const rows=scheduleCache;if(rows.length<2){c.innerHTML='<div class="empty">暂无课表数据</div>';return}const f=scheduleFields();const labels={time:'时间',location:'地点',teacher:'教师',classNo:'教学班',classComp:'教学班组成',remark:'选课备注',hoursComp:'课程学时组成',weekHours:'周学时',totalHours:'总学时',exam:'考核方式',credit:'学分',teachMode:'授课方式',nature:'课程性质'};let h='<table class="schedule-table"><tbody>';for(let i=0;i<rows.length;i++){h+='<tr>';for(let j=0;j<rows[i].length;j++){const v=rows[i][j]||'';if(i===0||i===1){h+='<th>'+esc(v)+'</th>';continue}const p=splitCell(v);if(!p.name){h+='<td></td>';continue}let ic=icsCache.filter(function(x){return x.name===p.name});let card='<div class="course-card'+(p.partial?' partial':'')+'">';card+='<div class="course-name">'+esc(p.name)+'</div>';if(ic.length){const f0=ic[0];card+='<div class="course-weeks">🗓️ '+esc(f0.start+' ~ '+f0.end)+(f0.weeks?' · '+esc(f0.weeks):'')+'</div>'}if(ic.length){const f0=ic[0];card+='<div class="course-weeks">🗓️ '+esc(f0.start+' ~ '+f0.end)+(f0.weeks?' · '+esc(f0.weeks):'')+'</div>'}const tags=[];for(const key of f){if(p[key]&&labels[key])tags.push('<span class="field-tag field-'+key+'">'+labels[key]+' '+esc(p[key])+'</span>')}if(p.partial&&p.weeks)tags.push('<span class="field-tag field-time">周次 '+esc(p.weeks)+'</span>');if(tags.length)card+='<div class="course-meta">'+tags.join('')+'</div>';card+='</div>';h+='<td>'+card+'</td>'}h+='</tr>'}h+='</tbody></table>';c.innerHTML=h}
+document.querySelectorAll('#fieldFilter input').forEach(function(cb){cb.addEventListener('change',renderSchedule)});
+function examVal(it,keys){for(const k of keys){if(it[k])return it[k]}return ''}
+function examStatus(time){if(!time)return {t:'',c:''};const m=String(time).match(/^\d{4}-\d{2}-\d{2}/);if(!m)return {t:'待考',c:'upcoming'};const d=new Date(m[0].replace(/-/g,'/'));const now=new Date();const h=86400000;if(isNaN(d))return {t:'待考',c:'upcoming'};if(d<now-h)return {t:'已结束',c:'past'};if(Math.abs(d-now)<h)return {t:'今日',c:'today'};return {t:'待考',c:'upcoming'}}
+async function loadExams(){const c=document.getElementById('examList');c.innerHTML='<div class="exam-empty">⏳ 加载中...</div>';try{const r=await fetch('/api/exams',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('exXn').value,xqm:document.querySelector('input[name="exXq"]:checked').value})});const d=await r.json();if(!d.ok){c.innerHTML='<div class="exam-empty">'+esc(d.error||'加载失败')+'</div>';return}const items=d.exams||[];if(!items.length){c.innerHTML='<div class="exam-empty">📌 当前学期暂无考试安排</div>';return}const colors=['#7c6cf0','#22b8cf','#f06595','#fab005','#51cf66','#ff922b'];c.innerHTML=items.map((it,idx)=>{const title=examVal(it,['kcmc','课程名称']);const sub=examVal(it,['ksmc','考试名称']);const date=examVal(it,['kssj','考试时间']);const loc=examVal(it,['cdmc','ksdd','考试地点','场地简称']);const campus=examVal(it,['cdxqmc','考试校区']);const method=examVal(it,['khfs','考核方式']);const room='';const college=examVal(it,['kkxy','jgmc','开课学院']);const seat=examVal(it,['zwh','考试座号']);const credit=examVal(it,['xf','学分']);const retake=examVal(it,['cxbj','重修标记']);const remark=examVal(it,['bz','备注']);const st=(/^\d{4}-\d{2}-\d{2}/.test(date||''))?examStatus(date):((sub&&sub.indexOf('期中')>-1)?{t:'已结束',c:'past'}:{t:'',c:''});let h='<div class="exam-card" style="--bar:'+colors[idx%colors.length]+'">';h+='<div class="exam-head"><div><div class="exam-title">'+esc(title||'未命名考试')+'</div>'+(sub?'<div class="exam-sub">'+esc(sub)+'</div>':'')+(date?'<div class="exam-date">🗓️ '+esc(date)+'</div>':'')+'</div>'+(st.t?'<span class="exam-status '+st.c+'">'+esc(st.t)+'</span>':'')+'</div>';const meta=[];if(loc)meta.push('<span>📍 '+esc(loc)+(campus?' · '+esc(campus):'')+'</span>');if(method)meta.push('<span>📝 '+esc(method)+'</span>');if(room)meta.push('<span>🏫 '+esc(room)+'</span>');if(college)meta.push('<span>🏛️ '+esc(college)+'</span>');if(seat)meta.push('<span>🪑 座号 '+esc(seat)+'</span>');if(credit)meta.push('<span>⭐ '+esc(credit)+'学分</span>');if(retake&&retake!=='否')meta.push('<span>🔁 重修</span>');if(remark)meta.push('<span>💬 '+esc(remark)+'</span>');if(meta.length)h+='<div class="exam-meta">'+meta.join('')+'</div>';h+='</div>';return h}).join('')}catch(e){c.innerHTML='<div class="exam-empty">'+esc(e.message||'网络错误')+'</div>'}}
+(function(){const tabs=document.querySelectorAll('.topnav .tab');let dragSrc=null;function applyNavOrder(){try{const order=JSON.parse(localStorage.getItem('navOrder')||'[]');if(order.length){order.forEach(function(p){const el=document.querySelector('.topnav .tab[data-page="'+p+'"]');if(el)document.querySelector('.topnav .tabs').appendChild(el)})}}catch(e){}}tabs.forEach(function(t){t.addEventListener('dragstart',function(e){dragSrc=t;t.classList.add('dragging')});t.addEventListener('dragend',function(){t.classList.remove('dragging');if(dragSrc){const order=Array.from(document.querySelectorAll('.topnav .tab')).map(function(x){return x.dataset.page});localStorage.setItem('navOrder',JSON.stringify(order));dragSrc=null}});t.addEventListener('dragover',function(e){e.preventDefault()});t.addEventListener('drop',function(e){e.preventDefault();if(dragSrc&&dragSrc!==t){const box=document.querySelector('.topnav .tabs');const a=Array.from(box.children).indexOf(dragSrc),b=Array.from(box.children).indexOf(t);if(a<b)box.insertBefore(dragSrc,t.nextSibling);else box.insertBefore(dragSrc,t)}})});applyNavOrder()})();
+function scoreGrade(v){const n=parseFloat(v);if(isNaN(n))return {g:'',t:''};if(n>=90)return {g:'good',t:'优秀'};if(n>=80)return {g:'good',t:'良好'};if(n>=70)return {g:'mid',t:'中等'};if(n>=60)return {g:'pass',t:'及格'};return {g:'fail',t:'不及格'}}
+async function loadScores(){const c=document.getElementById('scoreList');c.innerHTML='<div class="exam-empty">⏳ 加载中...</div>';try{const r=await fetch('/api/scores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('scXn').value,xqm:document.querySelector('input[name="scXq"]:checked').value})});const d=await r.json();if(!d.ok){c.innerHTML='<div class="exam-empty">'+esc(d.error||'加载失败')+'</div>';return}const items=d.scores||[];if(!items.length){c.innerHTML='<div class="exam-empty">📊 当前学期暂无成绩</div>';return}const colors=['#7c6cf0','#22b8cf','#f06595','#fab005','#51cf66','#ff922b'];c.innerHTML=items.map((it,idx)=>{const name=examVal(it,['kcmc','课程名称']);const score=examVal(it,['bfzcj','cj','yscj','成绩']);const credit=examVal(it,['xf','学分']);const jd=examVal(it,['jd','绩点']);const nature=examVal(it,['kcxzmc','课程性质']);const cat=examVal(it,['kclbmc','课程类别']);const teacher=examVal(it,['jsxm','任课教师']);const college=examVal(it,['jgmc','开课学院']);const method=examVal(it,['khfs','考核方式']);const remark=examVal(it,['bz','成绩备注']);const sg=scoreGrade(score);let h='<div class="exam-card" style="--bar:'+colors[idx%colors.length]+'">';h+='<div class="exam-head"><div><div class="exam-title">'+esc(name||'未命名课程')+'</div>'+(nature||cat?'<div class="exam-sub">'+esc(nature||cat)+(method?' · '+esc(method):'')+'</div>':'')+'</div><div>'+(score?'<div class="score-num">'+esc(score)+'</div>':'')+(sg.t?'<span class="score-grade '+sg.g+'">'+esc(sg.t)+'</span>':'')+'</div></div>';const meta=[];if(credit)meta.push('<span>⭐ '+esc(credit)+'学分</span>');if(jd)meta.push('<span>📈 绩点 '+esc(jd)+'</span>');if(teacher)meta.push('<span>👨‍🏫 '+esc(teacher)+'</span>');if(college)meta.push('<span>🏛️ '+esc(college)+'</span>');if(remark)meta.push('<span>💬 '+esc(remark)+'</span>');if(meta.length)h+='<div class="exam-meta">'+meta.join('')+'</div>';h+='</div>';return h}).join('')}catch(e){c.innerHTML='<div class="exam-empty">'+esc(e.message||'网络错误')+'</div>'}}
+</script>
+</body>
+</html>
