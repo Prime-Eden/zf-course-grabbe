@@ -72,6 +72,3 @@ python run.py
 
 - 参考 [vancehuds/VanceCoursePro](https://github.com/vancehuds/VanceCoursePro)
   和 [zfn_api](https://github.com/openschoolcn/zfn_api) 的 API 交互思路
-## License
-
-[MIT](LICENSE)
