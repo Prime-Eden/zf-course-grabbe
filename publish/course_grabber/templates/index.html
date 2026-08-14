@@ -1,246 +1,683 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>教学管理信息服务平台</title>
+
 <style>
+
+:root{--bg:#f5f7fa;--surface:#fff;--border:#e2e6ec;--border-strong:#d1d5db;--text:#1f2937;--text-2:#6b7280;--text-3:#9ca3af;--brand:#2563eb;--brand-hover:#1d4ed8;--brand-soft:#eef2ff;--ok:#16a34a;--ok-soft:#f0fdf4;--err:#dc2626;--err-soft:#fef2f2;--warn:#d97706;--warn-soft:#fffbeb;--info:#0284c7;--info-soft:#f0f9ff;--sidebar:#0f172a;--sidebar-text:#94a3b8;--sidebar-active:#e2e8f0;--radius-s:6px;--radius-m:8px;--radius-l:10px;--r-pill:999px;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--shadow:0 1px 2px rgba(15,23,42,.06);--shadow-hover:0 4px 12px rgba(15,23,42,.08);--font:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;--mono:"Cascadia Code",Consolas,"Microsoft YaHei Mono",monospace}
+
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Microsoft YaHei","微软雅黑",sans-serif;background:#eef1f5;color:#333;min-height:100vh}
-.hidden{display:none!important}a{color:#1a73e8;text-decoration:none}
-.topnav{background:#1e3a5f;color:#fff;display:flex;align-items:center;padding:0 20px;height:44px;font-size:14px}
-.topnav .brand{font-weight:700;margin-right:30px;white-space:nowrap}
-.topnav .tabs{display:flex;gap:0;height:100%}
-.topnav .tab{padding:0 18px;height:100%;display:flex;align-items:center;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;color:#b0c4de}
-.topnav .tab:hover{color:#fff}.topnav .tab.act{color:#fff;border-bottom-color:#4da3ff;background:rgba(255,255,255,.08)}
-.topnav .right{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12px}
-.topnav .btn-sm{padding:3px 10px;border:1px solid #4da3ff;color:#4da3ff;background:transparent;border-radius:3px;cursor:pointer;font-size:11px}
-.wrap{max-width:1300px;margin:12px auto;padding:0 12px}
-.login-card{background:#fff;padding:30px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:420px;margin:60px auto}
-.login-card h2{font-size:17px;margin-bottom:16px;color:#1e3a5f}
-.login-card input{width:100%;padding:9px 12px;border:1px solid #d0d0d0;border-radius:3px;font-size:13px;margin-bottom:10px;outline:none}
-.login-card input:focus{border-color:#1a73e8}.login-card .row{display:flex;gap:8px}
-.btn{padding:8px 20px;border:none;border-radius:3px;font-size:13px;cursor:pointer}
-.btn-pri{background:#1a73e8;color:#fff}.btn-red{background:#d93025;color:#fff}.btn-green{background:#188038;color:#fff}
-.btn-out{background:#fff;color:#555;border:1px solid #ccc}.btn:disabled{opacity:.4;cursor:not-allowed}
-.dual{display:grid;grid-template-columns:280px 1fr;gap:12px;min-height:calc(100vh - 110px)}
-.panel{background:#fff;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column}
-.panel-h{padding:10px 14px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:600;color:#1e3a5f;display:flex;align-items:center;gap:8px}
-.panel-b{padding:10px 14px;flex:1;overflow-y:auto}.panel-f{padding:8px 14px;border-top:1px solid #e8e8e8;display:flex;gap:8px}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12px}
-.set-row label{cursor:pointer;display:flex;align-items:center;gap:6px}
-.task-item{padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px}
-.task-item .t-name{font-weight:500}.task-item .t-meta{color:#888;font-size:11px;margin-top:2px}
-.log-box{background:#1a1a2e;color:#8f8;font-family:Consolas,monospace;font-size:11px;padding:8px 10px;border-radius:3px;max-height:180px;overflow-y:auto;margin-top:6px}
-.filter-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;font-size:12px}
-.filter-bar select,.filter-bar input{padding:4px 6px;border:1px solid #d0d0d0;border-radius:3px;font-size:12px}
-.filter-bar input{width:160px}
-.cat-tabs{display:flex;gap:3px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid #eee}
-.ctab{padding:4px 10px;border-radius:3px;font-size:12px;cursor:pointer;border:1px solid #d0d0d0;background:#fff;white-space:nowrap}
-.ctab.act{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-.course-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;align-items:center}
-.course-item:last-child{border-bottom:none}.c-name{font-weight:500;color:#1a1a1a}
-.c-meta{color:#666;font-size:12px;margin-top:3px;line-height:1.5}.c-meta span{margin-right:12px}
-.c-actions{text-align:right;white-space:nowrap}.c-actions button{padding:4px 12px;border-radius:3px;font-size:12px;cursor:pointer}
-.tag{display:inline-block;padding:1px 6px;border-radius:2px;font-size:11px;margin-right:4px}
-.tag-ok{background:#e6f4ea;color:#188038}.tag-full{background:#fce8e6;color:#d93025}.tag-info{background:#e8f0fe;color:#1a73e8}
-.schedule-table{width:100%;border-collapse:collapse;font-size:12px}
-.schedule-table th,.schedule-table td{border:1px solid #d0d0d0;padding:4px;text-align:center;vertical-align:top}
-.schedule-table th{background:#f0f4f8;font-weight:500;color:#555}
-.schedule-toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #e8e8e8;background:#f8fafc}
+
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+.hidden{display:none!important}
+
+a{color:var(--brand);text-decoration:none}
+
+#topnav{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--sidebar);flex-direction:column;align-items:stretch;padding:var(--s4) var(--s3);z-index:40;border-radius:0}
+
+#topnav .brand{font-family:var(--mono);font-weight:700;font-size:15px;color:#fff;padding:var(--s2) var(--s3) var(--s4);border-bottom:1px solid rgba(148,163,184,.2);white-space:nowrap}
+
+#topnav .tabs{display:flex;flex-direction:column;gap:var(--s1);padding:var(--s4) 0}
+
+#topnav .tab{display:flex;align-items:center;gap:var(--s2);padding:10px var(--s3);border-radius:var(--radius-s);color:var(--sidebar-text);cursor:pointer;font-size:14px;border-left:3px solid transparent;transition:background .15s,color .15s}
+
+#topnav .tab:hover{color:#fff;background:rgba(148,163,184,.12)}
+
+#topnav .tab.act{color:var(--sidebar-active);background:rgba(37,99,235,.18);border-left-color:var(--brand);font-weight:600}
+
+#topnav .tab.dragging{opacity:.6}
+
+#topnav .right{margin-top:auto;padding:var(--s4) var(--s3) var(--s2);border-top:1px solid rgba(148,163,184,.2);display:flex;flex-direction:column;gap:var(--s3);font-size:12px;color:var(--sidebar-text)}
+
+#topnav .btn-sm{padding:5px 12px;border:1px solid rgba(148,163,184,.45);color:var(--sidebar-text);background:transparent;border-radius:var(--radius-s);cursor:pointer;font-size:12px}
+
+#topnav .btn-sm:hover{color:#fff;border-color:#fff}
+
+.login-card{background:var(--surface);padding:var(--s6);border-radius:var(--radius-l);box-shadow:var(--shadow);border:1px solid var(--border);max-width:420px;margin:60px auto}
+
+.login-card h2{font-size:18px;margin-bottom:var(--s4);color:var(--text)}
+
+.login-card input{width:100%;padding:9px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-s);font-size:13px;margin-bottom:var(--s3);outline:none;background:#fff}
+
+.login-card input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+
+.login-card .row{display:flex;gap:var(--s2)}
+
+#mainWrap{margin-left:240px;padding:var(--s5);min-height:100vh}
+
+.wrap{max-width:1440px;margin:0 auto}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 var(--s4);border:none;border-radius:var(--radius-s);font-size:13px;font-family:var(--font);cursor:pointer;transition:background .15s,box-shadow .15s;white-space:nowrap}
+
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.btn-pri{background:var(--brand);color:#fff}
+
+.btn-pri:hover:not(:disabled){background:var(--brand-hover)}
+
+.btn-red{background:var(--err);color:#fff}
+
+.btn-red:hover:not(:disabled){background:#b91c1c}
+
+.btn-green{background:var(--ok);color:#fff}
+
+.btn-green:hover:not(:disabled){background:#15803d}
+
+.btn-out{background:#fff;color:var(--text-2);border:1px solid var(--border-strong)}
+
+.btn-out:hover{color:var(--text);border-color:var(--text-3)}
+
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow);display:flex;flex-direction:column}
+
+.panel-h{display:flex;align-items:center;gap:var(--s2);padding:12px var(--s4);border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text)}
+
+.panel-b{padding:var(--s4);flex:1;overflow-y:auto}
+
+.panel-f{padding:var(--s3) var(--s4);border-top:1px solid var(--border);display:flex;gap:var(--s2)}
+
+.dual{display:grid;grid-template-columns:300px 1fr 400px;gap:var(--s4);min-height:calc(100vh - 140px);align-items:start;transition:grid-template-columns .18s}
+
+.dual.xk-collapsed{grid-template-columns:300px 1fr 42px}
+
+.filter-bar{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;padding:var(--s2) 0;font-size:13px}
+
+.filter-bar select,.filter-bar input,select{height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:var(--radius-s);font-size:13px;background:#fff;color:var(--text);outline:none}
+
+.filter-bar input{width:180px}
+
+.filter-bar select:focus,.filter-bar input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:var(--s2) 0;font-size:13px}
+
+.set-row label{cursor:pointer;display:flex;align-items:center;gap:var(--s2)}
+
+input[type=checkbox],input[type=radio]{accent-color:var(--brand)}
+
+.task-item{padding:var(--s3) 0;border-bottom:1px solid var(--border);font-size:13px}
+
+.task-item .t-name{font-weight:600}
+
+.task-item .t-meta{color:var(--text-2);font-size:12px;margin-top:2px}
+
+.log-box{background:#f8fafc;border:1px solid var(--border);color:var(--text-2);font-family:var(--mono);font-size:12px;padding:var(--s3);border-radius:var(--radius-s);max-height:200px;overflow-y:auto;margin-top:var(--s2);line-height:1.7}
+
+.cat-tabs{display:flex;gap:var(--s1);flex-wrap:wrap;padding:var(--s2) 0;border-bottom:1px solid var(--border)}
+
+.ctab{padding:5px 12px;border-radius:var(--r-pill);font-size:12px;cursor:pointer;border:1px solid var(--border-strong);background:#fff;white-space:nowrap}
+
+.ctab.act{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+.course-item{display:grid;grid-template-columns:1fr auto;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--border);font-size:13px;align-items:center}
+
+.course-item:last-child{border-bottom:none}
+
+.c-name{font-weight:600;color:var(--text)}
+
+.c-meta{color:var(--text-2);font-size:12px;margin-top:3px;line-height:1.5}
+
+.c-meta span{margin-right:12px}
+
+.c-actions{text-align:right;white-space:nowrap}
+
+.c-actions button{padding:5px 12px;border-radius:var(--radius-s);font-size:12px}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:var(--r-pill);font-size:11px;margin-right:4px}
+
+.tag-ok{background:var(--ok-soft);color:var(--ok)}
+
+.tag-full{background:var(--err-soft);color:var(--err)}
+
+.tag-info{background:var(--info-soft);color:var(--info)}
+
+.empty{text-align:center;color:var(--text-3);padding:32px 16px;font-size:13px}
+
+.alert{padding:8px 12px;border-radius:var(--radius-s);font-size:12px;margin-bottom:var(--s2)}
+
+.alert-err{background:var(--err-soft);color:var(--err)}
+
+.schedule-toolbar{display:flex;align-items:center;gap:10px;padding:12px var(--s4);border-bottom:1px solid var(--border);background:var(--surface)}
+
 .schedule-select{position:relative}
-.schedule-select summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#fff;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;color:#333;user-select:none}
+
+.schedule-select summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:#fff;border:1px solid var(--border-strong);border-radius:var(--radius-s);font-size:12px;color:var(--text);user-select:none}
+
 .schedule-select summary::-webkit-details-marker{display:none}
-.schedule-select[open] summary{box-shadow:0 0 0 3px rgba(26,115,232,.15);border-color:#1a73e8}
-.schedule-options{position:absolute;top:calc(100% + 6px);left:0;min-width:220px;background:#fff;border:1px solid #e2e6ec;border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.12);padding:8px;z-index:20;display:grid;gap:2px}
-.schedule-options label{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:#333}
-.schedule-options label:hover{background:#f1f5fb}
-.schedule-options input{accent-color:#1a73e8;width:14px;height:14px}
-.course-card{background:#fff;border:1px solid #e8ecf1;border-radius:10px;padding:10px 8px;box-shadow:0 1px 3px rgba(15,23,42,.05);transition:opacity .15s ease-out}
-.course-card.partial{opacity:.55}
-.course-name{font-size:15px;font-weight:600;text-align:center;color:#111;line-height:1.3;word-break:break-word}
-.course-meta{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 8px;font-size:12px;color:#666;text-align:center}
-.course-weeks{margin-top:4px;font-size:11px;color:#8a94a6;text-align:center}
-.field-tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;line-height:1.6;white-space:normal;word-break:break-word}
-.field-time{background:#e3f2fd;color:#1565c0}
-.field-location{background:#e8f5e9;color:#2e7d32}
-.field-teacher{background:#f3e5f5;color:#6a1b9a}
-.field-classNo{background:#e0f7fa;color:#00695c}
-.field-classComp{background:#fff3e0;color:#e65100}
-.field-remark{background:#efebe9;color:#5d4037}
-.field-hoursComp{background:#fce4ec;color:#ad1457}
-.field-weekHours{background:#f1f8e9;color:#558b2f}
-.field-totalHours{background:#e8eaf6;color:#283593}
-.field-exam{background:#fbe9e7;color:#bf360c}
-.field-credit{background:#fff8e1;color:#f9a825}
-.field-teachMode{background:#ede7f6;color:#4527a0}
-.field-nature{background:#eceff1;color:#37474f}
-.empty{text-align:center;color:#bbb;padding:30px;font-size:13px}
-.alert{padding:8px 12px;border-radius:3px;font-size:12px;margin-bottom:8px}
-.alert-err{background:#fce8e6;color:#d93025}
-.exam-page{background:linear-gradient(135deg,#eef2ff 0%,#f3e8ff 55%,#e0e7ff 100%);min-height:calc(100vh - 56px);padding:16px}
-.exam-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.exam-toolbar select{padding:9px 12px;border:1px solid #d8d2f0;border-radius:10px;background:#fff;font-size:13px;outline:none}
-.exam-toolbar select:focus{border-color:#7c6cf0;box-shadow:0 0 0 3px rgba(124,108,240,.15)}
-.exam-btn{padding:9px 18px;border:none;border-radius:10px;background:#6d5bd0;color:#fff;font-size:13px;cursor:pointer;min-height:40px}
-.exam-btn:hover{background:#5a48bd}
-.sem-radios{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
-.sem-radios label{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;background:#fff;border:1px solid #d8d2f0;border-radius:10px;font-size:13px;cursor:pointer}
-.sem-radios input{accent-color:#6d5bd0;width:15px;height:15px}
-.exam-list{display:flex;flex-direction:column;gap:14px;max-width:980px;margin:0 auto}
-.exam-card{position:relative;display:flex;flex-direction:column;gap:10px;background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 4px 18px rgba(90,60,180,.10);border-left:5px solid var(--bar,#7c6cf0);overflow:hidden}
+
+.schedule-select[open] summary{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+
+.schedule-options{position:absolute;top:calc(100% + 6px);left:0;min-width:220px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-m);box-shadow:var(--shadow-hover);padding:var(--s2);z-index:20;display:grid;gap:2px}
+
+.schedule-options label{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius-s);cursor:pointer;font-size:12px;color:var(--text)}
+
+.schedule-options label:hover{background:var(--brand-soft)}
+
+.schedule-options input{width:14px;height:14px}
+
+.schedule-scroll{overflow-x:auto}
+.schedule-table{table-layout:fixed;width:100%;min-width:900px;border-collapse:separate;border-spacing:3px;font-size:12px;background:#f8fafc;border-radius:10px;padding:3px}
+.schedule-table th,.schedule-table td{border:none;padding:3px;text-align:center;vertical-align:top;height:52px}
+.schedule-table th{background:#eef2ff;color:#4338ca;font-weight:700;border-radius:8px}
+.schedule-table td{background:#fff;border-radius:8px;box-shadow:var(--shadow)}
+.schedule-table td.empty-cell{background:#f8fafc;box-shadow:none}
+.schedule-block{width:100%;height:100%;min-height:46px;border-radius:8px;padding:5px 6px;color:#fff;text-align:left;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center}
+.sb-name{font-weight:700;font-size:12px;line-height:1.25;word-break:break-all}
+.sb-weeks{font-size:10px;opacity:.95;margin-top:1px}
+.sb-meta{font-size:10px;opacity:.92;margin-top:2px;line-height:1.3}
+.xk-mini-table{border-collapse:collapse;border:1px solid rgba(148,163,184,.35)}
+.xk-mini-table th,.xk-mini-table td{border:1px solid rgba(148,163,184,.28)}
+.schedule-table th,.schedule-table td{border:1px solid rgba(148,163,184,.28)}
+.schedule-mini.course-card{padding:6px 4px;border-radius:6px}
+.schedule-mini .course-name{font-size:12px}
+.schedule-mini .course-weeks{font-size:10px}
+.schedule-mini .course-meta{font-size:10px;margin-top:3px}
+.course-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:10px 8px;box-shadow:var(--shadow);transition:opacity .15s,box-shadow .15s}
+
+.course-card:hover{box-shadow:var(--shadow-hover)}
+
+.course-card.partial{opacity:.6}
+
+.course-name{font-size:14px;font-weight:600;text-align:center;color:var(--text);line-height:1.3;word-break:break-word}
+
+.course-meta{margin-top:6px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 8px;font-size:12px;color:var(--text-2);text-align:center}
+
+.course-weeks{margin-top:4px;font-size:11px;color:var(--text-3);text-align:center}
+
+.field-tag{display:inline-block;padding:2px 8px;border-radius:var(--radius-s);font-size:11px;line-height:1.6;white-space:normal;word-break:break-word;background:#f8fafc;color:var(--text-2)}
+
+.field-time{background:var(--info-soft);color:#075985}
+
+.field-location{background:#ecfdf5;color:#047857}
+
+.field-teacher{background:#f5f3ff;color:#6d28d9}
+
+.field-classNo{background:#f0f9ff;color:#0e7490}
+
+.field-classComp{background:#fffbeb;color:#b45309}
+
+.field-remark{background:#f8fafc;color:#475569}
+
+.field-hoursComp{background:#fdf2f8;color:#be185d}
+
+.field-weekHours{background:#f0fdf4;color:#15803d}
+
+.field-totalHours{background:#eef2ff;color:#4338ca}
+
+.field-exam{background:var(--err-soft);color:#b91c1c}
+
+.field-credit{background:#fffbeb;color:#a16207}
+
+.field-teachMode{background:#faf5ff;color:#7e22ce}
+
+.field-nature{background:#f8fafc;color:#334155}
+
+.xk-sched-panel{max-height:calc(100vh - 100px);overflow:hidden}
+
+.xk-sched-body{display:flex;flex-direction:column;gap:var(--s3)}
+
+.xk-mini-table{table-layout:fixed;width:100%;border-collapse:collapse;font-size:12px}
+
+.xk-mini-table th,.xk-mini-table td{border:1px solid var(--border);padding:3px;text-align:center;vertical-align:middle;height:46px;overflow:hidden}
+
+.xk-mini-table th{background:#f8fafc;font-weight:600;color:var(--text-2)}
+
+.xk-mini-table td{background:#fff}
+
+.xk-bar{display:block;width:100%;height:100%;border-radius:6px;padding:4px 5px;cursor:pointer;overflow:hidden;text-align:left;color:#fff;font-size:12px;line-height:1.3;box-sizing:border-box}
+
+.xk-bar:hover{filter:brightness(1.06)}
+
+.xk-bar .xk-n{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+
+.xk-bar .xk-m{opacity:.94;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+
+.xk-vlabel{display:none;writing-mode:vertical-rl;letter-spacing:2px;font-size:13px;color:var(--text-2);cursor:pointer;height:100%;align-items:center;justify-content:center}
+
+.dual.xk-collapsed .xk-sched-panel .panel-b{display:none}
+.dual.xk-collapsed .xk-sched-panel .xk-hide{display:none}
+.dual.xk-collapsed .xk-vlabel{display:flex}
+
+.xk-course-detail{border:1px solid var(--border);border-radius:var(--radius-m);padding:var(--s3);font-size:12px;display:flex;flex-direction:column;gap:6px}
+
+.xk-course-detail .xk-d-name{font-weight:700;font-size:13px}
+
+.xk-course-detail .xk-d-meta{color:var(--text-2);line-height:1.5}
+
+.xk-course-detail .row{display:flex;gap:var(--s2);align-items:center}
+
+.xk-course-detail button{padding:5px 12px;border-radius:var(--radius-s);font-size:12px}
+
+.exam-page{min-height:calc(100vh - 80px);padding:var(--s4)}
+
+.exam-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:var(--s4)}
+
+.exam-btn{height:40px;padding:0 18px;border:none;border-radius:var(--radius-s);background:var(--brand);color:#fff;font-size:13px;cursor:pointer;font-family:var(--font)}
+
+.exam-btn:hover{background:var(--brand-hover)}
+
+.sem-radios{display:inline-flex;gap:var(--s1);align-items:center;flex-wrap:wrap}
+
+.sem-radios label{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#fff;border:1px solid var(--border-strong);border-radius:var(--radius-s);font-size:13px;cursor:pointer}
+
+.exam-list{display:flex;flex-direction:column;gap:var(--s3);max-width:980px;margin:0 auto}
+
+.exam-card{position:relative;display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--bar,var(--brand));border-radius:var(--radius-l);padding:16px 18px;box-shadow:var(--shadow)}
+
 .exam-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.exam-title{font-size:17px;font-weight:700;color:#2b2350;line-height:1.35}
-.exam-sub{font-size:13px;color:#8b7fd0;margin-top:4px}
-.exam-date{font-size:14px;color:#6d5bd0;font-weight:600;margin-top:4px}
-.exam-status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
-.exam-status.past{background:#f1f3f5;color:#666}
-.exam-status.today{background:#e7f6ec;color:#1e7d43}
-.exam-status.upcoming{background:#fdf0d8;color:#b7791f}
-.exam-meta{display:flex;flex-wrap:wrap;gap:8px}
-.exam-meta span{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:#f6f4ff;color:#4b3f85;font-size:12px;line-height:1.4}
-.exam-empty{text-align:center;color:#6b5f9e;padding:40px 16px;font-size:14px}
-.ics-section{margin-top:20px;border-top:1px solid #e8ecf1;padding-top:16px}
-.ics-title{font-size:15px;font-weight:700;color:#1e3a5f;margin-bottom:12px}
+
+.exam-title{font-size:16px;font-weight:700;color:var(--text);line-height:1.35}
+
+.exam-sub{font-size:13px;color:var(--text-2);margin-top:4px}
+
+.exam-date{font-size:13px;color:var(--brand);font-weight:600;margin-top:4px}
+
+.exam-status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-pill);font-size:12px;font-weight:600;white-space:nowrap}
+
+.exam-status.past{background:#f1f5f9;color:#64748b}
+
+.exam-status.today{background:var(--ok-soft);color:var(--ok)}
+
+.exam-status.upcoming{background:var(--warn-soft);color:var(--warn)}
+
+.exam-meta{display:flex;flex-wrap:wrap;gap:var(--s2)}
+
+.exam-meta span{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--radius-s);background:#f8fafc;color:var(--text-2);font-size:12px;line-height:1.4}
+
+.exam-empty{text-align:center;color:var(--text-3);padding:40px 16px;font-size:14px}
+
+.ics-section{margin-top:var(--s5);border-top:1px solid var(--border);padding-top:var(--s4)}
+
+.ics-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px}
+
 .ics-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-.ics-card{background:#fff;border:1px solid #e8ecf1;border-radius:10px;padding:10px 8px;box-shadow:0 1px 3px rgba(15,23,42,.05);border-left:4px solid #7c6cf0;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
-.ics-name{font-size:15px;font-weight:600;color:#111;line-height:1.3;word-break:break-word}
+
+.ics-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:10px 8px;box-shadow:var(--shadow);border-left:4px solid var(--brand);display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
+
+.ics-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word}
+
 .ics-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
-.ics-meta span{font-size:11px;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#4b3f85;line-height:1.6}
-.score-num{font-size:26px;font-weight:800;line-height:1;text-align:center;color:var(--bar,#7c6cf0)}
-.score-grade{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
-.score-grade.good{background:#e7f6ec;color:#1e7d43}
-.score-grade.mid{background:#fdf0d8;color:#b7791f}
-.score-grade.pass{background:#e8f0fe;color:#1a73e8}
-.score-grade.fail{background:#fce8e6;color:#d93025}
-@media(max-width:640px){.exam-card{padding:14px 14px}.exam-title{font-size:15px}.exam-head{flex-direction:column}}
+
+.ics-meta span{font-size:11px;padding:2px 8px;border-radius:var(--r-pill);background:var(--brand-soft);color:#4338ca;line-height:1.6}
+
+.score-num{font-size:26px;font-weight:800;line-height:1;text-align:center;color:var(--bar,var(--brand))}
+
+.score-grade{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-pill);font-size:12px;font-weight:600}
+
+.score-grade.good{background:var(--ok-soft);color:var(--ok)}
+
+.score-grade.mid{background:var(--warn-soft);color:var(--warn)}
+
+.score-grade.pass{background:var(--info-soft);color:var(--info)}
+
+.score-grade.fail{background:var(--err-soft);color:var(--err)}
+
+@media(max-width:768px){
+
+#topnav{position:relative;width:100%;flex-direction:row;align-items:center;gap:var(--s2);padding:var(--s2);overflow-x:auto}
+
+#topnav .brand{font-size:13px;padding:0 var(--s2);border-bottom:none;white-space:nowrap}
+
+#topnav .tabs{flex-direction:row;gap:var(--s1);padding:0;overflow-x:auto}
+
+#topnav .tab{padding:8px 12px;border-left:none;border-bottom:2px solid transparent;white-space:nowrap}
+
+#topnav .tab.act{border-bottom-color:var(--brand)}
+
+#topnav .right{margin-top:0;padding:0;border-top:none;flex-direction:row;align-items:center;gap:var(--s2);margin-left:auto;white-space:nowrap}
+
+#mainWrap{margin-left:0;padding:var(--s3)}
+
+.dual{grid-template-columns:1fr}
+
+.exam-card{padding:14px}.exam-title{font-size:15px}.exam-head{flex-direction:column}
+
+}
+
+@media(max-width:480px){ #topnav .right #hbDot,#topnav .right #navUser{display:none}}
+
 </style>
+
 </head>
+
 <body>
+
 <div class="topnav" id="topnav" style="display:none">
+
 <div class="brand">教学管理信息服务平台</div>
+
 <div class="tabs">
+
 <div class="tab" data-page="home" draggable="true" onclick="navTo('home')">首页</div>
+
 <div class="tab act" data-page="xk" draggable="true" onclick="navTo('xk')">选课</div>
+
 <div class="tab" data-page="kbcx" draggable="true" onclick="navTo('kbcx')">课表查询</div>
+
 <div class="tab" data-page="cj" draggable="true" onclick="navTo('cj')">成绩查询</div>
+
 <div class="tab" data-page="ks" draggable="true" onclick="navTo('ks')">考试查询</div>
+
 </div>
+
 <div class="right"><span id="hbDot" style="display:none;color:#6f6;font-size:11px">心跳正常</span><span id="navUser"></span><button class="btn-sm" onclick="doLogout()">退出</button></div>
+
 </div>
+
 <div id="loginSec" class="login-card">
+
 <h2>用户登录</h2><div id="loginErr" class="alert alert-err hidden"></div>
+
 <input type="text" id="uname" placeholder="学号 / 工号" autocomplete="off">
+
 <input type="password" id="pwd" placeholder="密码" autocomplete="off">
-<div class="row"><button class="btn btn-pri" id="loginBtn" onclick="doLogin()" style="flex:1">登录</button><button class="btn btn-out" onclick="loadSession()">加载会话</button></div>
+
+<div class="row"><button class="btn btn-pri" id="loginBtn" onclick="doLogin()" style="flex:1">登录</button><button class="btn btn-pri" id="webvpnBtn" onclick="doWebvpnLogin()" style="flex:1">WebVPN 登录</button><button class="btn btn-out" onclick="loadSession()">加载会话</button></div>
+
 <div style="font-size:11px;color:#999;margin-top:8px">密码经加密传输，不保存原始密码。</div>
+
 </div>
+
 <div class="wrap hidden" id="mainWrap">
+
 <div id="page-xk"><div class="dual">
+
 <div class="panel" style="max-height:calc(100vh - 100px)">
+
 <div class="panel-h"><span>🚀</span> 自助抢课</div>
+
 <div class="panel-b">
+
 <div class="set-row"><label><input type="checkbox" id="keepLogin" checked> 保持登录</label></div>
+
 <div style="margin:6px 0"><b>当前排队抢课</b></div>
+
 <div id="taskList"><div class="empty">暂未添加课程</div></div>
+
 <div style="margin:6px 0"><b>日志查看</b></div>
+
 <div class="log-box" id="logBox"><div>等待任务启动...</div></div>
+
 </div>
+
 <div class="panel-f"><button class="btn btn-green" id="startBtn" onclick="startMon()" style="flex:1">开始自助抢课</button><button class="btn btn-red" id="stopBtn" onclick="stopMon()" disabled>停止</button></div>
+
 </div>
+
 <div class="panel" style="max-height:calc(100vh - 100px)">
+
 <div class="panel-h"><span>📚</span> 板块课<span style="font-weight:400;font-size:11px;color:#888;margin-left:8px" id="catLabel">全部课程</span></div>
+
 <div class="panel-b">
+
 <div class="filter-bar">
+
 <input type="text" id="searchKw" placeholder="课程名/教师/编号" onkeydown="if(event.key==='Enter')doSearch()">
+
 <button class="btn btn-pri" onclick="doSearch()" style="padding:4px 10px;font-size:12px">检索</button>
+
 </div>
+
 <div class="cat-tabs" id="catTabs"></div>
+
 <div id="searchRes" style="margin-top:8px"></div>
+
 </div>
+
 </div>
+
+<div class="panel xk-sched-panel" id="xkSchedulePanel">
+
+<div class="panel-h"><span>📋</span> <span class="xk-hide">已选课表</span>
+<span style="flex:1" class="xk-hide"></span>
+<button class="btn btn-out xk-hide" onclick="syncXkSchedule()" style="padding:4px 10px;font-size:12px">同步 API</button>
+<button class="btn btn-out xk-hide" onclick="toggleXkPanel()" style="padding:4px 10px;font-size:12px" id="xkPanelToggle">收起</button>
+</div>
+
+<div class="xk-vlabel" onclick="toggleXkPanel()" title="展开课表">已选课表</div>
+
+<div class="panel-b xk-sched-body" id="xkSchedBody">
+<div id="xkMiniTable"><div class="empty">点击同步或进入课表查询加载已选课表</div></div>
+<div id="xkCourseDetail" class="xk-course-detail"></div>
+</div>
+
+</div>
+
 </div></div>
+
 <div id="page-kbcx" class="hidden"><div class="panel">
+
 <div class="panel-h"><span>📅</span> 课表查询
+
 <select id="kbXn" onchange="loadSchedule()"><option value="2025">2025-2026</option><option value="2026" selected>2026-2027</option><option value="2027">2027-2028</option><option value="2028">2028-2029</option></select>
-<span class="sem-radios"><label><input type="radio" name="kbXq" value="1" checked onchange="loadSchedule()"> 第1学期</label><label><input type="radio" name="kbXq" value="2" onchange="loadSchedule()"> 第2学期</label></span>
+
+<span class="sem-radios"><label><input type="radio" name="kbXq" value="3" checked onchange="loadSchedule()"> 第1学期</label><label><input type="radio" name="kbXq" value="12" onchange="loadSchedule()"> 第2学期</label></span>
 </div>
+
 <div class="schedule-toolbar">
+
 <details class="schedule-select" id="fieldFilter">
+
 <summary>显示字段</summary>
+
 <div class="schedule-options">
+
 <label><input type="checkbox" class="fld" value="time"> 时间</label>
+
 <label><input type="checkbox" class="fld" value="location" checked> 地点</label>
+
 <label><input type="checkbox" class="fld" value="teacher" checked> 教师</label>
+
 <label><input type="checkbox" class="fld" value="classNo"> 教学班</label>
+
 <label><input type="checkbox" class="fld" value="classComp"> 教学班组成</label>
+
 <label><input type="checkbox" class="fld" value="remark"> 选课备注</label>
+
 <label><input type="checkbox" class="fld" value="hoursComp"> 课程学时组成</label>
+
 <label><input type="checkbox" class="fld" value="weekHours"> 周学时</label>
+
 <label><input type="checkbox" class="fld" value="totalHours"> 总学时</label>
+
 <label><input type="checkbox" class="fld" value="exam"> 考核方式</label>
+
 <label><input type="checkbox" class="fld" value="credit"> 学分</label>
+
 <label><input type="checkbox" class="fld" value="teachMode"> 授课方式名称</label>
+
 <label><input type="checkbox" class="fld" value="nature"> 课程性质</label>
+
 </div>
+
 </details>
+
 <span style="font-size:11px;color:#888">勾选要显示的课程信息，表格自动更新</span>
+
 </div>
+
 <div class="panel-b"><div id="scheduleContent"><div class="empty">请选择学年学期加载课表</div></div></div>
+
 </div></div>
+
 <div id="page-home" class="hidden"><div class="panel"><div class="panel-b"><div class="empty">首页 - 待开发</div></div></div></div>
+
 <div id="page-cj" class="hidden"><div class="exam-page">
+
 <div class="exam-toolbar">
+
 <select id="scXn" onchange="loadScores()"><option value="2025" selected>2025-2026</option><option value="2026">2026-2027</option><option value="2027">2027-2028</option><option value="2028">2028-2029</option></select>
+
 <span class="sem-radios"><label><input type="radio" name="scXq" value="3" onchange="loadScores()"> 第1学期</label><label><input type="radio" name="scXq" value="12" checked onchange="loadScores()"> 第2学期</label></span>
+
 <button class="exam-btn" onclick="loadScores()">📊 查询成绩</button>
+
 </div>
+
 <div class="exam-list" id="scoreList"><div class="exam-empty">📊 暂无成绩</div></div>
+
 </div></div>
+
 <div id="page-ks" class="hidden"><div class="exam-page">
+
 <div class="exam-toolbar">
+
 <select id="exXn" onchange="loadExams()"><option value="2025">2025-2026</option><option value="2026" selected>2026-2027</option><option value="2027">2027-2028</option><option value="2028">2028-2029</option></select>
+
 <span class="sem-radios"><label><input type="radio" name="exXq" value="3" onchange="loadExams()"> 第1学期</label><label><input type="radio" name="exXq" value="12" checked onchange="loadExams()"> 第2学期</label></span>
+
 <button class="exam-btn" onclick="loadExams()">📅 查询考试</button>
+
 </div>
+
 <div class="exam-list" id="examList"><div class="exam-empty">📌 暂无考试安排</div></div>
+
 </div></div>
+
 </div>
+
 <script>
+
 let loggedIn=false,monitoring=false,activePage='xk',activeKklxdm='',tasks=[],categories=[],pollTimer=null;
+
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
 function showErr(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.remove('hidden')}
+
 async function doLogin(){const u=document.getElementById('uname').value.trim(),p=document.getElementById('pwd').value;if(!u||!p){showErr('请输入学号和密码');return}const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='登录中...';try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(d.ok){loggedIn=true;showMain()}else showErr(d.error||'登录失败')}catch(e){showErr(e.message||'网络错误')}finally{btn.disabled=false;btn.textContent='登录'}}
+
+async function doWebvpnLogin(){const u=document.getElementById('uname').value.trim(),p=document.getElementById('pwd').value;if(!u||!p){showErr('请输入学号和密码');return}const btn=document.getElementById('webvpnBtn');btn.disabled=true;btn.textContent='WebVPN 登录中...';try{const r=await fetch('/api/login/webvpn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(d.ok){loggedIn=true;showMain()}else showErr(d.error||'WebVPN 登录失败')}catch(e){showErr(e.message||'网络错误')}finally{btn.disabled=false;btn.textContent='WebVPN 登录'}}
+
 async function loadSession(){try{const r=await fetch('/api/session/load',{method:'POST'});const d=await r.json();if(d.ok){loggedIn=true;showMain()}else showErr(d.error||'无可用会话')}catch(e){showErr(e.message||'网络错误')}}
-async function showMain(){document.getElementById('loginSec').classList.add('hidden');document.getElementById('mainWrap').classList.remove('hidden');document.getElementById('topnav').style.display='flex';await loadCategories();navTo('xk');startPoll()}
-function navTo(page){activePage=page;document.querySelectorAll('.topnav .tab').forEach(t=>t.classList.toggle('act',t.dataset.page===page));document.querySelectorAll('[id^="page-"]').forEach(p=>p.classList.add('hidden'));const el=document.getElementById('page-'+page);if(el)el.classList.remove('hidden');if(page==='xk')doSearch();if(page==='kbcx')loadSchedule();if(page==='ks')loadExams();if(page==='cj')loadScores();if(page==='cj')loadScores();if(page==='cj')loadScores()}
+
+async function showMain(){document.getElementById('loginSec').classList.add('hidden');document.getElementById('mainWrap').classList.remove('hidden');document.getElementById('topnav').style.display='flex';await loadCategories();navTo('xk');startPoll();if(!xkLoaded){syncXkSchedule()}}
+
+function navTo(page){activePage=page;document.querySelectorAll('.topnav .tab').forEach(t=>t.classList.toggle('act',t.dataset.page===page));document.querySelectorAll('[id^="page-"]').forEach(p=>p.classList.add('hidden'));const el=document.getElementById('page-'+page);if(el)el.classList.remove('hidden');if(page==='xk')doSearch();if(page==='kbcx')loadSchedule();if(page==='ks')loadExams();if(page==='cj')loadScores()}
+
 async function doLogout(){try{await fetch('/api/logout',{method:'POST'})}catch(e){}location.reload()}
+
 function startPoll(){if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(refreshTasks,3000)}
+
 async function loadCategories(){try{const r=await fetch('/api/categories');const d=await r.json();if(d.ok&&d.categories){categories=d.categories;renderCatTabs()}}catch(e){}}
+
 function renderCatTabs(){const c=document.getElementById('catTabs');let h='<div class="ctab'+(activeKklxdm?'':' act')+'" onclick="setCat(\'\')">全部</div>';for(const t of categories){h+='<div class="ctab'+(activeKklxdm===t.kklxdm?' act':'')+'" onclick="setCat(\''+esc(t.kklxdm)+'\')">'+esc(t.name)+'</div>'}c.innerHTML=h}
+
 function setCat(k){activeKklxdm=k;renderCatTabs();document.getElementById('catLabel').textContent=categories.find(c=>c.kklxdm===k)?.name||'全部课程';doSearch()}
+
 async function doSearch(){const kw=document.getElementById('searchKw').value.trim();try{const r=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,kklxdm:activeKklxdm})});const d=await r.json();renderResults(d.courses||[])}catch(e){}}
+
 function renderResults(courses){const c=document.getElementById('searchRes');if(!courses.length){c.innerHTML='<div class="empty">暂无课程数据（选课期未开放或接口待适配）</div>';return}c.innerHTML=courses.map(co=>{const cap=parseInt(co.capacity)||0,sel=parseInt(co.selected)||0,rem=Math.max(0,cap-sel);const inQueue=tasks.some(t=>t.course_id===co.id);return'<div class="course-item"><div><div class="c-name">'+esc(co.name)+' <span style="color:#999;font-weight:400;font-size:11px">'+esc(co.id)+'</span></div><div class="c-meta">'+(co.teacher?'<span>教师：'+esc(co.teacher)+'</span>':'')+(co.time?'<span>时间：'+esc(co.time)+'</span>':'')+(co.location?'<span>地点：'+esc(co.location)+'</span>':'')+(co.credit?'<span>学分：'+esc(co.credit)+'</span>':'')+'</div><div class="c-meta"><span class="tag '+(rem>0?'tag-ok':'tag-full')+'">'+(rem>0?'余量 '+rem:'已满')+'</span><span class="tag tag-info">'+sel+'/'+(cap||'?')+'</span></div></div><div class="c-actions">'+(inQueue?'<button class="btn-red" onclick="removeTask(\''+esc(co.id)+'\')" style="padding:4px 8px;font-size:11px">取消抢课</button>':'<button class="btn-pri" onclick="addTask(\''+esc(co.id)+'\',\''+esc(co.name)+'\')" style="padding:4px 8px;font-size:11px">加入抢课</button>')+'</div></div>'}).join('')}
-async function addTask(id,name){if(tasks.length>=10){alert('最多添加 10 个任务');return}try{const r=await fetch('/api/tasks/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_id:id,course_name:name,target_jxb_id:'',interval:2.0,xnm:(document.getElementById('selXn').value||'2026-2027').split('-')[0],xqm:document.getElementById('selXq').value||'1'})});const d=await r.json();if(d.ok){logAdd('加入抢课队列：'+name);await refreshTasks();doSearch()}else alert(d.message||'添加失败')}catch(e){alert(e.message)}}
+
+async function addTask(id,name){if(tasks.length>=10){alert('最多添加 10 个任务');return}function pickValue(selId){const el=document.getElementById(selId);return el?el.value:''}function pickRadio(name){const el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:''}const xnm=pickValue('selXn')||pickValue('kbXn')||pickValue('scXn')||pickValue('exXn')||'2026';const xqm=pickValue('selXq')||pickRadio('kbXq')||pickRadio('scXq')||pickRadio('exXq')||'1';try{const r=await fetch('/api/tasks/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_id:id,course_name:name,target_jxb_id:'',interval:2.0,xnm:xnm.split('-')[0],xqm})});const d=await r.json();if(d.ok){logAdd('加入抢课队列：'+name);await refreshTasks();doSearch()}else alert(d.message||'添加失败')}catch(e){alert(e.message)}}
+
 async function removeTask(id){try{await fetch('/api/tasks/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_id:id})});logAdd('取消抢课');await refreshTasks();doSearch()}catch(e){}}
+
 async function refreshTasks(){try{const r=await fetch('/api/tasks');const d=await r.json();if(d.ok){tasks=d.tasks;renderTasks()}}catch(e){}}
+
 function renderTasks(){const c=document.getElementById('taskList');if(!tasks.length){c.innerHTML='<div class="empty">暂未添加课程</div>';return}c.innerHTML=tasks.map(t=>{const s=t.status==='running'?'监控中':t.status==='success'?'已抢到':'已停止';return'<div class="task-item"><div class="t-name">'+esc(t.course_name||t.name)+'</div><div class="t-meta">'+s+' | 班级 '+esc(t.target_jxb_id||'自动')+' | 尝试'+t.attempts+'次 | '+esc(t.last_msg||'')+'</div><button class="btn-red" onclick="removeTask(\''+esc(t.course_id||t.id)+'\')" style="padding:2px 6px;font-size:10px;margin-top:3px">取消抢课</button></div>'}).join('')}
+
 function logAdd(msg){const box=document.getElementById('logBox');const ts=new Date().toLocaleTimeString();box.innerHTML+='<div>['+ts+'] '+esc(msg)+'</div>';if(box.children.length>60)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight}
+
 async function startMon(){try{const r=await fetch('/api/monitor/start',{method:'POST'});const d=await r.json();if(d.ok){monitoring=true;logAdd('自助抢课已启动');updateMonUI()}else alert(d.message||'启动失败')}catch(e){alert(e.message)}}
+
 async function stopMon(){try{await fetch('/api/monitor/stop',{method:'POST'});monitoring=false;logAdd('自助抢课已停止');updateMonUI()}catch(e){}}
+
 function updateMonUI(){document.getElementById('startBtn').disabled=monitoring;document.getElementById('stopBtn').disabled=!monitoring}
+
 let scheduleCache=[];let icsCache=[];
+function initScheduleYearSelect(){const sel=document.getElementById('kbXn');if(!sel)return;const cur=sel.value||'2026';sel.innerHTML='';for(let y=2031;y>=2000;y--){const o=document.createElement('option');o.value=String(y);o.textContent=y+'-'+(y+1);if(String(y)===cur)o.selected=true;sel.appendChild(o)}}
+initScheduleYearSelect();
 function scheduleFields(){return Array.from(document.querySelectorAll('#fieldFilter .fld')).filter(function(x){return x.checked}).map(function(x){return x.value})}
-function splitCell(text){text=String(text||'').replace(/浙大城市学院/g,'');const tokens=text.split(/\s+/).filter(Boolean);const out={name:'',time:'',weeks:'',location:'',teacher:'',classNo:'',classComp:'',remark:'',hoursComp:'',weekHours:'',totalHours:'',exam:'',credit:'',teachMode:'',nature:'',partial:false};let plain=0,nums=[];for(const t of tokens){if(/^(?:\([\d-]+节\))?\d+-\d+周/.test(t)){const tm=t.match(/\((\d+-\d+节)\)/);if(tm)out.time=tm[1];const w=t.match(/\d+-\d+周(?:[,，]\d+-\d+周)*/);if(w){out.weeks=w[0];out.partial=/,|，/.test(out.weeks)||/单周|双周|隔周/.test(t)}continue}if(/^[\u4e00-\u9fa5]+$/.test(t)){if(/校内|场地|楼|室/.test(t)){out.location+=(out.location?' · ':'')+t;continue}if(/必修|选修|限选/.test(t)){out.nature=t;continue}if(/考查|考试|实践|论文/.test(t)){out.exam=t;continue}if(/面授|线上|混合|授课/.test(t)){out.teachMode=t;continue}plain++;if(plain===1){out.name=t;continue}if(plain===2){out.teacher=t;continue}continue}if(/教[一二三四五六七八九十\d]?\d+|楼|室|校内|场地/.test(t)){out.location+=(out.location?' · ':'')+t;continue}if(/讲课|实验|上机/.test(t)){out.hoursComp+=(out.hoursComp?' ':'')+t;continue}if(/;/.test(t)){out.classComp=t;continue}if(/^\(/.test(t)){out.classNo=t;continue}if(/^\d+\.\d+$/.test(t)&&!out.credit){out.credit=t;continue}if(/^\d+$/.test(t)){nums.push(t);continue}if(!out.classNo&&/-/.test(t)){out.classNo=t;continue}}if(nums.length>0&&!out.weekHours)out.weekHours=nums[0];if(nums.length>1&&!out.totalHours)out.totalHours=nums[1];return out}
-async function loadSchedule(){const c=document.getElementById('scheduleContent');c.innerHTML='<div class="empty">加载中...</div>';try{const r=await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('kbXn').value,xqm:document.querySelector('input[name="kbXq"]:checked').value})});const d=await r.json();if(!d.ok){c.innerHTML='<div class="empty">'+esc(d.error||'加载失败')+'</div>';return}scheduleCache=d.schedule||[];try{const q=await fetch('/api/schedule-ics');const qd=await q.json();icsCache=qd.courses||[]}catch(e){icsCache=[]}renderSchedule()}catch(e){c.innerHTML='<div class="empty">'+esc(e.message||'网络错误')+'</div>'}}
-function renderSchedule(){const c=document.getElementById('scheduleContent');const rows=scheduleCache;if(rows.length<2){c.innerHTML='<div class="empty">暂无课表数据</div>';return}const f=scheduleFields();const labels={time:'时间',location:'地点',teacher:'教师',classNo:'教学班',classComp:'教学班组成',remark:'选课备注',hoursComp:'课程学时组成',weekHours:'周学时',totalHours:'总学时',exam:'考核方式',credit:'学分',teachMode:'授课方式',nature:'课程性质'};let h='<table class="schedule-table"><tbody>';for(let i=0;i<rows.length;i++){h+='<tr>';for(let j=0;j<rows[i].length;j++){const v=rows[i][j]||'';if(i===0||i===1){h+='<th>'+esc(v)+'</th>';continue}const p=splitCell(v);if(!p.name){h+='<td></td>';continue}let ic=icsCache.filter(function(x){return x.name===p.name});let card='<div class="course-card'+(p.partial?' partial':'')+'">';card+='<div class="course-name">'+esc(p.name)+'</div>';if(ic.length){const f0=ic[0];card+='<div class="course-weeks">🗓️ '+esc(f0.start+' ~ '+f0.end)+(f0.weeks?' · '+esc(f0.weeks):'')+'</div>'}if(ic.length){const f0=ic[0];card+='<div class="course-weeks">🗓️ '+esc(f0.start+' ~ '+f0.end)+(f0.weeks?' · '+esc(f0.weeks):'')+'</div>'}const tags=[];for(const key of f){if(p[key]&&labels[key])tags.push('<span class="field-tag field-'+key+'">'+labels[key]+' '+esc(p[key])+'</span>')}if(p.partial&&p.weeks)tags.push('<span class="field-tag field-time">周次 '+esc(p.weeks)+'</span>');if(tags.length)card+='<div class="course-meta">'+tags.join('')+'</div>';card+='</div>';h+='<td>'+card+'</td>'}h+='</tr>'}h+='</tbody></table>';c.innerHTML=h}
+function splitCell(text){text=String(text||'').replace(/浙大城市学院/g,'');const tokens=text.split(/\s+/).filter(Boolean);const out={name:'',time:'',weeks:'',location:'',teacher:'',classNo:'',classComp:'',remark:'',hoursComp:'',weekHours:'',totalHours:'',exam:'',credit:'',teachMode:'',nature:'',partial:false};const surnames='王李张刘陈杨黄赵吴周徐孙马朱胡郭何高林罗郑梁谢宋唐许韩冯邓曹彭曾肖田董袁潘蒋蔡余杜叶程苏魏吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦傅方白邹孟熊秦邱江尹薛闫段雷侯龙史陶黎贺顾毛郝龚邵万钱严覃武戴莫孔向汤';const courseWords=['基础','原理','设计','技术','工程','英语','数学','物理','化学','体育','思政','实践','实验','导论','概论','分析','应用','系统','电路','电子','材料','管理','经济','法律','文化','专业','训练','方法','科学','研究','创新','创业','心理','健康','职业','规划','艺术','音乐','美术','写作','阅读','听力','口语','翻译','测试','建模','算法','编程','数据库','网络','软件','硬件','自动','信号','通信','机械','土木','建筑','生物','医学','护理','药学','法学','新闻','传播','制造','哲学','逻辑','历史','地理','综合','拓展','选修','必修','限选','通识','专项','竞赛','实训','实习','课程','教学','原理','理论'];function isPerson(t){if(!t||t.length<2||t.length>4)return false;for(const ch of t){if(ch<'一'||ch>'鿿')return false}return surnames.indexOf(t[0])>-1}function isCourse(t){if(!t||t.length<2)return false;for(const w of courseWords){if(t.indexOf(w)>-1)return true}for(const ch of t){if(/\d/.test(ch)||/[a-zA-Z]/.test(ch))return true}return t.length>=4&&!isPerson(t)}let teachers=[];let nums=[];for(const t of tokens){if(/^(?:\([\d-]+节\))?\d+-\d+周/.test(t)){const tm=t.match(/\((\d+-\d+节)\)/);if(tm)out.time=tm[1];const w=t.match(/\d+-\d+周(?:[,，]\d+-\d+周)*/);if(w){out.weeks=w[0];out.partial=/,|，/.test(out.weeks)||/单周|双周|隔周/.test(t)}continue}if(/^[\u4e00-\u9fa5]+$/.test(t)){if(/校内|场地|楼|室/.test(t)){if(out.location.indexOf(t)===-1)out.location+=(out.location?' · ':'')+t;continue}if(/必修|选修|限选/.test(t)){out.nature=t;continue}if(/考查|考试|实践|论文/.test(t)){out.exam=t;continue}if(/面授|线上|混合|授课/.test(t)){out.teachMode=t;continue}if(isCourse(t)&&!out.name){out.name=t;continue}if(isPerson(t)){if(teachers.indexOf(t)===-1)teachers.push(t);continue}if(!out.name){out.name=t;continue}continue}if(/教[一二三四五六七八九十\d]?\d+|楼|室|校内|场地/.test(t)){if(out.location.indexOf(t)===-1)out.location+=(out.location?' · ':'')+t;continue}if(/讲课|实验|上机/.test(t)){out.hoursComp+=(out.hoursComp?' ':'')+t;continue}if(/;/.test(t)){out.classComp=t;continue}if(/^\(/.test(t)){out.classNo=t;continue}if(/^\d+\.\d+$/.test(t)&&!out.credit){out.credit=t;continue}if(/^\d+$/.test(t)){nums.push(t);continue}if(!out.classNo&&/-/.test(t)){out.classNo=t;continue}}if(teachers.length)out.teacher=teachers.join('、');if(nums.length>0&&!out.weekHours)out.weekHours=nums[0];if(nums.length>1&&!out.totalHours)out.totalHours=nums[1];return out}
+
+async function loadSchedule(){const c=document.getElementById('scheduleContent');c.innerHTML='<div class="empty">加载中...</div>';try{const r=await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('kbXn').value,xqm:document.querySelector('input[name="kbXq"]:checked').value})});const d=await r.json();if(!d.ok){if(d.available_years&&d.available_years.length){const ys=document.getElementById('kbXn');ys.innerHTML='';d.available_years.forEach(function(y){const o=document.createElement('option');o.value=String(y);o.textContent=y+'-'+(Number(y)+1);ys.appendChild(o)});ys.value=String(d.available_years[d.available_years.length-1])}c.innerHTML='<div class="empty">'+esc(d.error||'加载失败')+'</div>';return}scheduleCache=d.schedule||[];icsCache=d.courses||[];renderSchedule()}catch(e){c.innerHTML='<div class="empty">'+esc(e.message||'网络错误')+'</div>'}}
+function dayIndex(d){d=String(d||'').replace(/星期/g,'').replace(/周/g,'').trim();const m={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'日':7};return m[d]||parseInt(d)||0}
+function scheduleEvents(){const evs=icsCache.filter(function(e){return e&&e.name&&e.day});if(evs.length)return evs;const rows=scheduleCache;const out=[];if(rows.length<2)return out;const dayHeaders=(rows[1]||[]).slice(2).filter(Boolean);for(let i=2;i<rows.length;i++){const row=rows[i]||[];const dm=String(row[0]||'').match(/(\d+)-(\d+)节/);for(let j=2;j<Math.min(row.length,2+dayHeaders.length);j++){const cell=row[j];if(!cell||String(cell).trim()===''||String(cell).trim()==='无')continue;const p=splitCell(cell);if(!p.name)continue;let s=0,e=0;if(p.time){const tm=p.time.match(/(\d+)-(\d+)/);if(tm){s=parseInt(tm[1]);e=parseInt(tm[2])}}else if(dm){s=parseInt(dm[1]);e=parseInt(dm[2])}out.push({name:p.name,day:dayHeaders[j-2]||'',weeks_str:p.weeks,location:p.location,teacher:p.teacher,period_start:s,period_end:e})}}return out}
+function renderSchedule(){
+  const c=document.getElementById('scheduleContent');
+  const evs=scheduleEvents();
+  if(!evs.length){c.innerHTML='<div class="empty">暂无课表数据</div>';return}
+  const show={location:true,teacher:true};
+  document.querySelectorAll('#fieldFilter .fld').forEach(function(cb){show[cb.value]=cb.checked});
+  const pal=['#2563eb','#7c3aed','#db2777','#ea580c','#059669','#0891b2','#4f46e5','#ca8a04'];
+  function color(name){let h=0;for(let i=0;i<name.length;i++){h=(h*31+name.charCodeAt(i))%1000000007}return pal[h%pal.length]}
+  const grid={};for(let d=1;d<=7;d++){grid[d]={};for(let p=1;p<=12;p++)grid[d][p]=[]}
+  for(let i=0;i<evs.length;i++){
+    const e=evs[i];
+    const d=dayIndex(e.day);
+    const s=parseInt(e.period_start)||0;
+    const en=Math.max(parseInt(e.period_end)||s,s);
+    if(!d||!s||s>12)continue;
+    for(let p=Math.max(1,s);p<=Math.min(12,en);p++)grid[d][p].push(i)
+  }
+  const days=['一','二','三','四','五','六','日'];
+  let h='<div class="schedule-scroll"><table class="schedule-table"><thead><tr><th>节次</th>';
+  for(let d=1;d<=7;d++)h+='<th>周'+days[d-1]+'</th>';
+  h+='</tr></thead><tbody>';
+  const placed={};
+  for(let p=1;p<=12;p++){
+    h+='<tr><th>'+p+'</th>';
+    for(let d=1;d<=7;d++){
+      if(placed[d+'-'+p])continue;
+      const arr=grid[d][p]||[];
+      if(!arr.length){h+='<td class="empty-cell"></td>';continue}
+      const i=arr[0];
+      const e=evs[i];
+      const s=Math.min(Math.max(parseInt(e.period_start)||p,1),12);
+      const en=Math.min(Math.max(parseInt(e.period_end)||s,s),12);
+      const span=Math.max(1,en-s+1);
+      for(let q=s;q<=en;q++)placed[d+'-'+q]=true;
+      let card='<div class="schedule-block" style="background:'+color(e.name)+'">';
+      card+='<div class="sb-name">'+esc(e.name)+'</div>';
+      if(e.weeks_str)card+='<div class="sb-weeks">'+esc(e.weeks_str)+'</div>';
+      const bits=[];
+      if(show.location&&e.location)bits.push(esc(e.location));
+      if(show.teacher&&e.teacher)bits.push(esc(e.teacher));
+      if(bits.length)card+='<div class="sb-meta">'+bits.join(' · ')+'</div>';
+      card+='</div>';
+      h+='<td rowspan="'+span+'">'+card+'</td>';
+    }
+    h+='</tr>';
+  }
+  h+='</tbody></table></div>';
+  c.innerHTML=h;
+}
+
 document.querySelectorAll('#fieldFilter input').forEach(function(cb){cb.addEventListener('change',renderSchedule)});
+
 function examVal(it,keys){for(const k of keys){if(it[k])return it[k]}return ''}
+
 function examStatus(time){if(!time)return {t:'',c:''};const m=String(time).match(/^\d{4}-\d{2}-\d{2}/);if(!m)return {t:'待考',c:'upcoming'};const d=new Date(m[0].replace(/-/g,'/'));const now=new Date();const h=86400000;if(isNaN(d))return {t:'待考',c:'upcoming'};if(d<now-h)return {t:'已结束',c:'past'};if(Math.abs(d-now)<h)return {t:'今日',c:'today'};return {t:'待考',c:'upcoming'}}
+
 async function loadExams(){const c=document.getElementById('examList');c.innerHTML='<div class="exam-empty">⏳ 加载中...</div>';try{const r=await fetch('/api/exams',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('exXn').value,xqm:document.querySelector('input[name="exXq"]:checked').value})});const d=await r.json();if(!d.ok){c.innerHTML='<div class="exam-empty">'+esc(d.error||'加载失败')+'</div>';return}const items=d.exams||[];if(!items.length){c.innerHTML='<div class="exam-empty">📌 当前学期暂无考试安排</div>';return}const colors=['#7c6cf0','#22b8cf','#f06595','#fab005','#51cf66','#ff922b'];c.innerHTML=items.map((it,idx)=>{const title=examVal(it,['kcmc','课程名称']);const sub=examVal(it,['ksmc','考试名称']);const date=examVal(it,['kssj','考试时间']);const loc=examVal(it,['cdmc','ksdd','考试地点','场地简称']);const campus=examVal(it,['cdxqmc','考试校区']);const method=examVal(it,['khfs','考核方式']);const room='';const college=examVal(it,['kkxy','jgmc','开课学院']);const seat=examVal(it,['zwh','考试座号']);const credit=examVal(it,['xf','学分']);const retake=examVal(it,['cxbj','重修标记']);const remark=examVal(it,['bz','备注']);const st=(/^\d{4}-\d{2}-\d{2}/.test(date||''))?examStatus(date):((sub&&sub.indexOf('期中')>-1)?{t:'已结束',c:'past'}:{t:'',c:''});let h='<div class="exam-card" style="--bar:'+colors[idx%colors.length]+'">';h+='<div class="exam-head"><div><div class="exam-title">'+esc(title||'未命名考试')+'</div>'+(sub?'<div class="exam-sub">'+esc(sub)+'</div>':'')+(date?'<div class="exam-date">🗓️ '+esc(date)+'</div>':'')+'</div>'+(st.t?'<span class="exam-status '+st.c+'">'+esc(st.t)+'</span>':'')+'</div>';const meta=[];if(loc)meta.push('<span>📍 '+esc(loc)+(campus?' · '+esc(campus):'')+'</span>');if(method)meta.push('<span>📝 '+esc(method)+'</span>');if(room)meta.push('<span>🏫 '+esc(room)+'</span>');if(college)meta.push('<span>🏛️ '+esc(college)+'</span>');if(seat)meta.push('<span>🪑 座号 '+esc(seat)+'</span>');if(credit)meta.push('<span>⭐ '+esc(credit)+'学分</span>');if(retake&&retake!=='否')meta.push('<span>🔁 重修</span>');if(remark)meta.push('<span>💬 '+esc(remark)+'</span>');if(meta.length)h+='<div class="exam-meta">'+meta.join('')+'</div>';h+='</div>';return h}).join('')}catch(e){c.innerHTML='<div class="exam-empty">'+esc(e.message||'网络错误')+'</div>'}}
+
 (function(){const tabs=document.querySelectorAll('.topnav .tab');let dragSrc=null;function applyNavOrder(){try{const order=JSON.parse(localStorage.getItem('navOrder')||'[]');if(order.length){order.forEach(function(p){const el=document.querySelector('.topnav .tab[data-page="'+p+'"]');if(el)document.querySelector('.topnav .tabs').appendChild(el)})}}catch(e){}}tabs.forEach(function(t){t.addEventListener('dragstart',function(e){dragSrc=t;t.classList.add('dragging')});t.addEventListener('dragend',function(){t.classList.remove('dragging');if(dragSrc){const order=Array.from(document.querySelectorAll('.topnav .tab')).map(function(x){return x.dataset.page});localStorage.setItem('navOrder',JSON.stringify(order));dragSrc=null}});t.addEventListener('dragover',function(e){e.preventDefault()});t.addEventListener('drop',function(e){e.preventDefault();if(dragSrc&&dragSrc!==t){const box=document.querySelector('.topnav .tabs');const a=Array.from(box.children).indexOf(dragSrc),b=Array.from(box.children).indexOf(t);if(a<b)box.insertBefore(dragSrc,t.nextSibling);else box.insertBefore(dragSrc,t)}})});applyNavOrder()})();
+
 function scoreGrade(v){const n=parseFloat(v);if(isNaN(n))return {g:'',t:''};if(n>=90)return {g:'good',t:'优秀'};if(n>=80)return {g:'good',t:'良好'};if(n>=70)return {g:'mid',t:'中等'};if(n>=60)return {g:'pass',t:'及格'};return {g:'fail',t:'不及格'}}
+
+let xkEvents=[];let xkLoaded=false;let xkCollapsed=false;let xkSel=null;
+function xkParseTime(t){const out=[];if(!t)return out;const segs=String(t).replace(/<br\s*\/?>/gi,'\u0001').split(/[\u0001、，,;；]/);for(const seg of segs){const m=seg.match(/星期([一二三四五六日])第(\d+)-(\d+)节\{([^}]+)\}/);if(!m)continue;const dmap={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'日':7};out.push({day:dmap[m[1]]||0,period_start:parseInt(m[2])||0,period_end:parseInt(m[3])||0,weeks_str:m[4]})}return out}
+async function syncXkSchedule(){const box=document.getElementById('xkMiniTable');box.innerHTML='<div class="empty">同步中...</div>';try{const r=await fetch('/api/selected',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('kbXn')?document.getElementById('kbXn').value:'2026',xqm:document.querySelector('input[name="kbXq"]:checked')?document.querySelector('input[name="kbXq"]:checked').value:'3'})});const d=await r.json();if(!d.ok){box.innerHTML='<div class="empty">'+esc(d.error||'同步失败')+'</div>';return}xkEvents=(d.courses||[]).map(c=>{const times=xkParseTime(c.time);const clean=function(s){return String(s||'').replace(/<br\s*\/?>/gi,' ').replace(/\s+/g,' ').trim()};return {name:c.name||c.title||'',course_id:c.course_id||'',class_id:c.class_id||'',do_id:c.do_id||'',teacher:clean(c.teacher),place:clean(c.place||c.location),credit:c.credit||'',category:c.category||'',nature:c.nature||'',weeks:c.weeks||'',time:clean(c.time),times:times.length?times:[{day:0,period_start:0,period_end:0,weeks_str:c.weeks||''}]}});xkLoaded=true;renderXkMini()}catch(e){box.innerHTML='<div class="empty">'+esc(e.message||'网络错误')+'</div>'}}
+function xkColor(i){const pal=['#2563eb','#7c3aed','#db2777','#ea580c','#059669','#0891b2','#4f46e5','#ca8a04'];return pal[i%pal.length]}
+function renderXkMini(){const c=document.getElementById('xkMiniTable');const days=['一','二','三','四','五','六','日'];let h='<table class="xk-mini-table"><thead><tr><th>节次</th>';for(let d=1;d<=7;d++)h+='<th>周'+days[d-1]+'</th>';h+='</tr></thead><tbody>';const grid={};for(let d=1;d<=7;d++){grid[d]={};for(let p=1;p<=12;p++)grid[d][p]=[]}for(let i=0;i<xkEvents.length;i++){const ev=xkEvents[i];for(const t of ev.times){const d=t.day||0;if(d<1||d>7)continue;const s=Math.min(Math.max(t.period_start||1,1),12),e=Math.min(Math.max(t.period_end||s,s),12);for(let p=s;p<=e;p++)grid[d][p].push(i)}}const placed={};for(let p=1;p<=12;p++){h+='<tr><th>'+p+'</th>';for(let d=1;d<=7;d++){if(placed[d+'-'+p])continue;const arr=grid[d][p]||[];if(!arr.length){h+='<td></td>';continue}const i=arr[0];const ev=xkEvents[i];let s=p,e=p;for(const t of ev.times){if((t.day||0)===d){s=Math.min(Math.max(t.period_start||1,1),12);e=Math.min(Math.max(t.period_end||s,s),12);break}}const span=Math.max(1,e-s+1);for(let q=s;q<=e;q++)placed[d+'-'+q]=true;h+='<td rowspan="'+span+'"><div class="xk-bar" style="background:'+xkColor(i)+'" onclick="xkShowDetail('+i+')"><div class="xk-n">'+esc(ev.name||'?')+'</div>'+(ev.teacher?'<div class="xk-m">'+esc(ev.teacher)+'</div>':'')+'</div></td>'}h+='</tr>'}h+='</tbody></table>';c.innerHTML=h;if(!xkEvents.length){c.innerHTML='<div class="empty">暂无已选课程</div>'}}
+function xkShowDetail(i){const ev=xkEvents[i];if(!ev){return}xkSel=i;const d=document.getElementById('xkCourseDetail');let h='<div class="xk-d-name">'+esc(ev.name||'未命名课程')+'</div>';const meta=[];if(ev.time)meta.push('时间：'+esc(ev.time));if(ev.place)meta.push('地点：'+esc(ev.place));if(ev.teacher)meta.push('教师：'+esc(ev.teacher));if(ev.credit)meta.push('学分：'+esc(ev.credit));if(ev.nature)meta.push('性质：'+esc(ev.nature));if(ev.category)meta.push('类别：'+esc(ev.category));if(ev.course_id)meta.push('课程号：'+esc(ev.course_id));if(meta.length)h+='<div class="xk-d-meta">'+meta.join('<br>')+'</div>';h+='<div class="row"><button class="btn btn-red" onclick="dropXkCourse()">退选</button><button class="btn btn-out" onclick="xkClearDetail()">关闭</button></div>';d.innerHTML=h}
+function xkClearDetail(){xkSel=null;document.getElementById('xkCourseDetail').innerHTML=''}
+async function dropXkCourse(){const ev=xkSel!=null?xkEvents[xkSel]:null;if(!ev){return}if(!ev.course_id||!ev.do_id){alert('该课程缺少退选标识，请先同步 API');return}try{const r=await fetch('/api/course/drop',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_id:ev.course_id,jxb_ids:ev.do_id})});const d=await r.json();if(d.ok){logAdd('退选成功：'+ev.name);xkEvents.splice(xkSel,1);xkSel=null;renderXkMini();xkClearDetail();doSearch()}else{alert(d.message||'退选失败')}}catch(e){alert(e.message)}}
+function toggleXkPanel(){const dual=document.getElementById('xkSchedulePanel').parentElement;xkCollapsed=!xkCollapsed;dual.classList.toggle('xk-collapsed',xkCollapsed);const btn=document.getElementById('xkPanelToggle');if(btn)btn.textContent=xkCollapsed?'展开':'收起'}
+window.addEventListener('load',function(){setTimeout(function(){const wrap=document.getElementById('mainWrap');if(wrap&&wrap.classList.contains('hidden')){fetch('/api/session/check').then(function(r){return r.json()}).then(function(d){if(d.has_session){loadSession()}}).catch(function(){})}},150)});
+
 async function loadScores(){const c=document.getElementById('scoreList');c.innerHTML='<div class="exam-empty">⏳ 加载中...</div>';try{const r=await fetch('/api/scores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xnm:document.getElementById('scXn').value,xqm:document.querySelector('input[name="scXq"]:checked').value})});const d=await r.json();if(!d.ok){c.innerHTML='<div class="exam-empty">'+esc(d.error||'加载失败')+'</div>';return}const items=d.scores||[];if(!items.length){c.innerHTML='<div class="exam-empty">📊 当前学期暂无成绩</div>';return}const colors=['#7c6cf0','#22b8cf','#f06595','#fab005','#51cf66','#ff922b'];c.innerHTML=items.map((it,idx)=>{const name=examVal(it,['kcmc','课程名称']);const score=examVal(it,['bfzcj','cj','yscj','成绩']);const credit=examVal(it,['xf','学分']);const jd=examVal(it,['jd','绩点']);const nature=examVal(it,['kcxzmc','课程性质']);const cat=examVal(it,['kclbmc','课程类别']);const teacher=examVal(it,['jsxm','任课教师']);const college=examVal(it,['jgmc','开课学院']);const method=examVal(it,['khfs','考核方式']);const remark=examVal(it,['bz','成绩备注']);const sg=scoreGrade(score);let h='<div class="exam-card" style="--bar:'+colors[idx%colors.length]+'">';h+='<div class="exam-head"><div><div class="exam-title">'+esc(name||'未命名课程')+'</div>'+(nature||cat?'<div class="exam-sub">'+esc(nature||cat)+(method?' · '+esc(method):'')+'</div>':'')+'</div><div>'+(score?'<div class="score-num">'+esc(score)+'</div>':'')+(sg.t?'<span class="score-grade '+sg.g+'">'+esc(sg.t)+'</span>':'')+'</div></div>';const meta=[];if(credit)meta.push('<span>⭐ '+esc(credit)+'学分</span>');if(jd)meta.push('<span>📈 绩点 '+esc(jd)+'</span>');if(teacher)meta.push('<span>👨‍🏫 '+esc(teacher)+'</span>');if(college)meta.push('<span>🏛️ '+esc(college)+'</span>');if(remark)meta.push('<span>💬 '+esc(remark)+'</span>');if(meta.length)h+='<div class="exam-meta">'+meta.join('')+'</div>';h+='</div>';return h}).join('')}catch(e){c.innerHTML='<div class="exam-empty">'+esc(e.message||'网络错误')+'</div>'}}
+
 </script>
+
 </body>
+
 </html>
+

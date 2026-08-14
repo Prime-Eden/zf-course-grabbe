@@ -7,6 +7,15 @@ BASE_URL = 'http://ijw.hzcu.edu.cn'
 SESSION_FILE = os.path.join(os.path.dirname(__file__), 'session.json')
 
 
+class ScheduleError(Exception):
+    """Structured schedule query failure."""
+
+    def __init__(self, message, code='query_failed', **extra):
+        super().__init__(message)
+        self.code = code
+        self.extra = extra
+
+
 class JW_Session:
     def __init__(self, base_url=BASE_URL, session_file=None):
         self.base_url = base_url
@@ -20,6 +29,8 @@ class JW_Session:
         self.modulus = None
         self.exponent = None
         self.student_info = {}
+        self._schedule_cache = {}
+        self._schedule_cache_ts = {}
         self._heartbeat_thread = None
         self._heartbeat_running = False
 
@@ -73,16 +84,25 @@ class JW_Session:
         try:
             with open(self.session_file, 'r') as f:
                 data = json.load(f)
+            self.base_url = data.get('base_url') or self.base_url
             self._load_cookies(data['cookies'])
-            resp = self._req('/xtgl/index_initMenu.html')
-            return 'login_slogin' not in resp
+            resp = self.sess.get(
+                urljoin(self.base_url, '/xtgl/index_initMenu.html'),
+                timeout=15, allow_redirects=True,
+            )
+            url = resp.url or ''
+            return 'index_initMenu' in url and 'shortcut' not in url
         except:
             return False
 
     def load_session(self):
         if not self.check_valid():
             return False
+        with open(self.session_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        self.username = data.get('username') or self.username
         self.logged_in = True
+        self.start_heartbeat()
         return True
 
     def _load_cookies(self, cookies):
@@ -189,8 +209,23 @@ class JW_Session:
                 except:
                     pass
 
-            if not headless:
-                print('[*] Drag the slider captcha, then click Login.')
+            solved = False
+            if username:
+                try:
+                    from slider_solver import solve_slider
+                    solved = solve_slider(page, self.base_url)
+                except Exception:
+                    solved = False
+
+            if not solved:
+                if not headless:
+                    print('[*] Auto slider failed; drag it manually, then click Login.')
+
+            if solved and username:
+                try:
+                    page.click('#dl')
+                except Exception:
+                    pass
 
             try:
                 page.wait_for_url('**/index_initMenu.html*', timeout=120000)
@@ -212,32 +247,91 @@ class JW_Session:
     def get_schedule(self, xnm='2026', xqm='3'):
         from playwright.sync_api import sync_playwright
         import re
-        cookies_data = json.load(open(self.session_file, 'r'))
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(channel="msedge", headless=True)
-            context = browser.new_context(viewport={'width':1280,'height':800})
-            context.add_cookies(cookies_data['cookies'])
-            page = context.new_page()
+        xnm = str(xnm)
+        xqm = str(xqm)
+        if xqm == '1':
+            xqm = '3'
+        elif xqm == '2':
+            xqm = '12'
 
-            url = '{}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default'.format(self.base_url)
-            page.goto(url, wait_until='networkidle', timeout=30000)
-            page.wait_for_selector('#xnm_chosen', timeout=10000)
-            page.wait_for_timeout(2000)
-            page.select_option('#xnm', xnm, force=True)
-            page.select_option('#xqm', xqm, force=True)
-            page.evaluate('$("#xnm").trigger("chosen:updated");$("#xqm").trigger("chosen:updated")')
-            page.wait_for_timeout(1000)
-            page.evaluate('cxKbContent(paramMap(),xszd)')
-            page.wait_for_timeout(4000)
+        cache_key = '{}_schedule_{}_{}'.format(self.username or 'anonymous', xnm, xqm)
+        import time as _t
+        now = _t.time()
+        if cache_key in self._schedule_cache:
+            cached_ts = self._schedule_cache_ts.get(cache_key, 0)
+            if now - cached_ts < 600:
+                return {'schedule': self._schedule_cache[cache_key], 'cached': True}
+        try:
+            with open(self.session_file, 'r', encoding='utf-8') as f:
+                cookies_data = json.load(f)
+        except Exception as e:
+            raise ScheduleError('会话文件不可用：{}'.format(e), code='session_expired')
 
-            html = page.content()
-            tables = re.findall(r'<table[^>]*>(.*?)</table>', html, re.S)
-            browser.close()
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(channel="msedge", headless=True)
+                context = browser.new_context(viewport={'width':1280,'height':800})
+                context.add_cookies([
+                    {k: v for k, v in c.items() if v is not None}
+                    for c in cookies_data.get('cookies', [])
+                ])
+                page = context.new_page()
+
+                url = '{}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default'.format(self.base_url)
+                try:
+                    page.goto(url, wait_until='networkidle', timeout=30000)
+                    page.wait_for_selector('#xnm_chosen', timeout=10000)
+                except Exception:
+                    if 'login_slogin' in page.url:
+                        raise ScheduleError('会话已过期，请重新登录', code='session_expired')
+                    raise ScheduleError('课表页面加载失败，可能会话过期或系统繁忙', code='load_failed')
+
+                try:
+                    page.wait_for_selector('#xnm option', timeout=5000)
+                except Exception:
+                    pass
+                try:
+                    years = [el.get_attribute('value') for el in page.query_selector_all('#xnm option')]
+                    terms = [el.get_attribute('value') for el in page.query_selector_all('#xqm option')]
+                except Exception:
+                    raise ScheduleError('未找到学年/学期选择器', code='load_failed')
+
+                if years and xnm not in years:
+                    raise ScheduleError(
+                        '学年 {} 不在该账号可选范围（可选: {}）'.format(xnm, '、'.join(years)),
+                        code='year_unavailable', available_years=years)
+                if terms and xqm not in terms:
+                    raise ScheduleError(
+                        '学期 {} 不在可选范围（可选: {}）'.format(xqm, '、'.join(terms)),
+                        code='term_unavailable', available_terms=terms)
+
+                page.select_option('#xnm', xnm, force=True)
+                page.select_option('#xqm', xqm, force=True)
+                page.evaluate('$("#xnm").trigger("chosen:updated");$("#xqm").trigger("chosen:updated")')
+                try:
+                    page.evaluate('cxKbContent(paramMap(),xszd)')
+                except Exception:
+                    raise ScheduleError('课表页面脚本执行失败，请重试', code='js_failed')
+                try:
+                    page.wait_for_function(
+                        "() => { const t = document.querySelectorAll('table'); return t.length > 0 && t[0].querySelectorAll('tr').length > 1 }",
+                        timeout=15000)
+                except Exception:
+                    pass
+                page.wait_for_timeout(500)
+
+                html = page.content()
+                tables = re.findall(r'<table[^>]*>(.*?)</table>', html, re.S)
+        except ScheduleError:
+            raise
+        except Exception as e:
+            raise ScheduleError('课表抓取异常：{}'.format(e), code='query_failed')
 
         schedule = []
-        if tables:
-            rows = re.findall(r'<tr[^>]*>(.*?)</tr>', tables[0], re.S)
+        for table in tables:
+            rows = re.findall(r'<tr[^>]*>(.*?)</tr>', table, re.S)
+            parsed = []
             for row in rows:
                 cells = re.findall(r'<(?:td|th)[^>]*>(.*?)</(?:td|th)>', row, re.S)
                 vals = []
@@ -246,7 +340,12 @@ class JW_Session:
                     text = text.replace('&nbsp;', '').replace('\xa0', '')
                     vals.append(text.strip())
                 if vals:
-                    schedule.append(vals)
+                    parsed.append(vals)
+            if parsed:
+                head = ' '.join(' '.join(r) for r in parsed[:2])
+                if '课表' in head or '时间段' in head or '节次' in head:
+                    schedule = parsed
+                    break
 
         if schedule and schedule[0]:
             title = schedule[0][0] if schedule[0] else ''
@@ -255,7 +354,9 @@ class JW_Session:
             title = re2.sub(r'学号：[\d]+', '学号：****', title)
             schedule[0][0] = title
 
-        return {'schedule': schedule, 'html_len': len(html)}
+        self._schedule_cache[cache_key] = schedule
+        self._schedule_cache_ts[cache_key] = _t.time()
+        return {'schedule': schedule, 'html_len': len(html), 'tables': len(tables)}
 
     def get_exams(self, xnm='2025', xqm='16'):
         url = urljoin(self.base_url, '/kwgl/kscx_cxXsksxxIndex.html?doType=query')
@@ -292,6 +393,8 @@ class JW_Session:
 
     def logout(self):
         self.stop_heartbeat()
+        self._schedule_cache.clear()
+        self._schedule_cache_ts.clear()
         try:
             self._req('/xtgl/login_logoutAccount.html', method='POST')
         except:

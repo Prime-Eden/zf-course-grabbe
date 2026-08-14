@@ -126,6 +126,8 @@ class GrabTask:
     last_result: str = ""
     last_checked_at: float = field(default_factory=time.time)
     added_at: float = field(default_factory=time.time)
+    xnm: str = '2025'
+    xqm: str = '12'
     log: list = field(default_factory=list)
 
     def add_log(self, msg):
@@ -216,6 +218,40 @@ class CourseManager:
         ok, cats = self._init_selection()
         return cats if ok else []
 
+    def get_selected_courses(self, xnm='2025', xqm='12'):
+        """Fetch courses already chosen by the student (works outside selection period)."""
+        url = '/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=N253512'
+        try:
+            data = self.session._req(
+                url,
+                method='POST',
+                data={'xkxnm': str(xnm), 'xkxqm': str(xqm)},
+                expect_json=True,
+            )
+        except Exception as e:
+            return {'courses': [], 'error': str(e)}
+        if not isinstance(data, list):
+            return {'courses': [], 'error': 'unexpected response'}
+        courses = []
+        for i in data:
+            courses.append({
+                'course_id': i.get('kch') or i.get('kch_id') or '',
+                'name': i.get('kcmc') or '',
+                'class_id': i.get('jxb_id') or '',
+                'do_id': i.get('do_jxb_id') or '',
+                'class_name': i.get('jxbmc') or '',
+                'teacher': i.get('jsxx') or '',
+                'credit': i.get('xf') or '',
+                'category': i.get('kklxmc') or '',
+                'capacity': i.get('jxbrs') or '',
+                'selected': i.get('yxzrs') or '',
+                'place': i.get('jxdd') or '',
+                'time': i.get('sksj') or '',
+                'optional': i.get('zixf') or '',
+                'waiting': i.get('sxbj') or '',
+            })
+        return {'courses': courses, 'total': len(courses)}
+
     # -- Course search / class detail --
 
     def search_courses(self, keyword="", category_kklxdm="", page=1, **extra_filters):
@@ -256,13 +292,17 @@ class CourseManager:
                     "id": item.get('kch_id') or item.get('kch') or "",
                     "name": item.get('kcmc') or "",
                     "credit": item.get('xf') or "",
-                    "category": item.get('kclbmc') or "",
+                    "category": item.get('kclbmc') or item.get('kklxmc') or "",
                     "teacher": item.get('jsxx') or "",
                     "weeks": item.get('zcm') or item.get('kssjd') or "",
                     "time": item.get('sksj') or "",
                     "location": item.get('jxdd') or "",
-                    "capacity": item.get('jxbrl') or item.get('kxsl') or "",
-                    "selected": item.get('yxzrs') or item.get('yxzrs') or "",
+                    "capacity": item.get('jxbrl') or item.get('jxbrs') or item.get('kxsl') or "",
+                    "selected": item.get('yxzrs') or "",
+                    "nature": item.get('kcxzmc') or "",
+                    "college": item.get('kkxymc') or "",
+                    "campus": item.get('xqumc') or "",
+                    "mode": item.get('jxms') or "",
                 })
             return {"courses": courses, "total": len(courses)}
 
@@ -331,6 +371,12 @@ class CourseManager:
                         "xf": item.get("xf") or "",
                         "xkbz": item.get("xkbz") or "",
                         "sxbj": item.get("sxbj") or "",
+                        "jxbxf": item.get("jxbxf") or "",
+                        "jxbzls": item.get("jxbzls") or "",
+                        "kcxzmc": item.get("kcxzmc") or "",
+                        "kkxymc": item.get("kkxymc") or "",
+                        "xqumc": item.get("xqumc") or "",
+                        "jxms": item.get("jxms") or "",
                     }
                 })
                 classes[-1]["is_full"] = classes[-1]["remaining"] <= 0
@@ -372,16 +418,16 @@ class CourseManager:
             return False, "课程编号为空"
         if course_id in self.tasks:
             return False, "该课程已在监控中"
-        if xnm:
-            self.xnm = str(xnm)
-        if xqm:
-            self.xqm = '3' if str(xqm) == '1' else ('12' if str(xqm) == '2' else str(xqm))
+        task_xnm = str(xnm) if xnm else '2025'
+        task_xqm = '3' if str(xqm) == '1' else ('12' if str(xqm) == '2' else (str(xqm) if xqm else '12'))
         course = CourseInfo(course_id=course_id, name=course_name or course_id)
         task = GrabTask(
             task_id=self._new_task_id(course_id),
             course=course,
             target_jxb_id=target_jxb_id,
             interval=interval,
+            xnm=task_xnm,
+            xqm=task_xqm,
         )
         self.tasks[course_id] = task
         task.add_log("已加入监控队列")
@@ -411,7 +457,7 @@ class CourseManager:
 
     def start_task(self, course_id):
         task = self.tasks.get(course_id)
-        if not task or task.status == TaskStatus.RUNNING:
+        if not task or (task.status == TaskStatus.RUNNING and self._threads.get(course_id) and self._threads[course_id].is_alive()):
             return
         ev = threading.Event()
         self._stop_events[course_id] = ev
@@ -488,7 +534,8 @@ class CourseManager:
                 }
             return {"grabbed": False, "summary": f"当前剩余 {remaining}", "log": ""}
 
-        select_payload = self._submit_select(course_id, selected_class, self.xnm, self.xqm)
+        task = self.tasks.get(course_id)
+        select_payload = self._submit_select(course_id, selected_class, task.xnm if task else self.xnm, task.xqm if task else self.xqm)
         flag = select_payload.get("flag")
         msg = select_payload.get("msg", str(select_payload))
         if flag == "1" or flag == 1:
@@ -552,6 +599,12 @@ class CourseManager:
                             "xf": item.get("xf") or "",
                             "xkbz": item.get("xkbz") or "",
                             "sxbj": item.get("sxbj") or "",
+                            "jxbxf": item.get("jxbxf") or "",
+                            "jxbzls": item.get("jxbzls") or "",
+                            "kcxzmc": item.get("kcxzmc") or "",
+                            "kkxymc": item.get("kkxymc") or "",
+                            "xqumc": item.get("xqumc") or "",
+                            "jxms": item.get("jxms") or "",
                         }
                     })
                 return {"classes": classes}
@@ -569,7 +622,16 @@ class CourseManager:
                         "weeks": self._s(cells[6]) if len(cells) > 6 else "",
                         "capacity": self._s(cells[7]) if len(cells) > 7 else "",
                         "selected": self._s(cells[8]) if len(cells) > 8 else "",
+                        "remaining": 0,
+                        "is_full": True,
                     })
+                    try:
+                        cap = int(re.sub(r"[^\d]", "", str(classes[-1]["capacity"])) or "0")
+                        sel = int(re.sub(r"[^\d]", "", str(classes[-1]["selected"])) or "0")
+                    except ValueError:
+                        cap, sel = 0, 0
+                    classes[-1]["remaining"] = max(0, cap - sel)
+                    classes[-1]["is_full"] = classes[-1]["remaining"] <= 0
             return {"classes": classes}
         except Exception as e:
             return {"classes": [], "error": str(e)}
@@ -595,6 +657,7 @@ class CourseManager:
             "njdm_id": self.session.student_info.get('njdm_id', ''),
             "zyh_id": self.session.student_info.get('zyh_id', ''),
             "kklxdm": self.session.student_info.get('kklxdm', '10'),
+            **SELECT_DEFAULTS,
         }
         text = self.session._req(XK_SELECT, method="POST", data=data)
         try:
@@ -609,15 +672,21 @@ class CourseManager:
             "xkxnm": self.session.student_info.get('xkxnm', '2025'),
             "xkxqm": self.session.student_info.get('xkxqm', '12'),
             **DROP_DEFAULTS,
+            "njdm_id": self.session.student_info.get('njdm_id', ''),
+            "zyh_id": self.session.student_info.get('zyh_id', ''),
+            "kklxdm": self.session.student_info.get('kklxdm', '10'),
         }
         text = self.session._req(XK_DROP, method="POST", data=data)
         try:
             result = json.loads(text)
         except Exception:
             result = {"flag": "-1", "msg": text[:500]}
-        flag = result.get("flag") if isinstance(result, dict) else result
-        if flag == "1" or flag == 1:
-            return {"ok": True, "msg": "退课成功", "raw": result}
+        if isinstance(result, dict):
+            if result.get("ok") is True:
+                return {"ok": True, "msg": result.get("msg", "退课成功"), "raw": result}
+            flag = result.get("flag")
+            if flag == "1" or flag == 1:
+                return {"ok": True, "msg": result.get("msg", "退课成功"), "raw": result}
         return {"ok": False, "msg": result.get("msg") if isinstance(result, dict) else str(result), "raw": result}
 
     def get_status(self):

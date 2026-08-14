@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session as fs
-from auth import JW_Session, SESSION_FILE
+from auth import JW_Session, SESSION_FILE, ScheduleError
 from courses import CourseManager
+from webvpn_cas import login_and_save as webvpn_login_and_save
 import os, secrets, threading, json, time
 import re
 from datetime import datetime
@@ -45,9 +46,11 @@ def parse_ics(path):
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
 
+SESSION_WEBVPN = os.path.join(os.path.dirname(__file__), 'session_webvpn.json')
 sessions = {}
 _login_lock = threading.Lock()
 _login_in_progress = False
+_forced_session_file = None
 
 def _uid():
     sid = fs.get('uid')
@@ -93,6 +96,22 @@ def api_login():
         with _login_lock:
             _login_in_progress = False
 
+
+@app.route('/api/login/webvpn', methods=['POST'])
+def api_login_webvpn():
+    d = request.json or {}
+    if not d.get('username') or not d.get('password'):
+        return jsonify({'ok': False, 'error': 'Missing credentials'})
+    try:
+        path, final_url = webvpn_login_and_save(d['username'], d['password'])
+        jw = JW_Session(session_file=path)
+        if not jw.load_session():
+            return jsonify({'ok': False, 'error': 'WebVPN session invalid'})
+        sessions[_uid()] = (jw, CourseManager(jw))
+        return jsonify({'ok': True, 'final_url': final_url})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)})
+
 @app.route('/api/logout', methods=['POST'])
 def api_logout():
     jw, cm = _cm()
@@ -107,6 +126,18 @@ def api_categories():
     if not cm:
         return jsonify({'ok': False, 'error': 'Not logged in'})
     return jsonify({'ok': True, 'categories': cm.get_categories()})
+
+@app.route('/api/selected', methods=['POST'])
+def api_selected():
+    _, cm = _cm()
+    if not cm:
+        return jsonify({'ok': False, 'error': 'Not logged in'})
+    d = request.json or {}
+    try:
+        result = cm.get_selected_courses(d.get('xnm', '2025'), d.get('xqm', '12'))
+        return jsonify({'ok': True, **result})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)})
 
 @app.route('/api/search', methods=['POST'])
 def api_search():
@@ -223,10 +254,13 @@ def api_status():
 
 @app.route('/api/session/check', methods=['GET'])
 def api_session_check():
-    if os.path.exists(SESSION_FILE):
+    session_file = SESSION_WEBVPN if os.path.exists(SESSION_WEBVPN) else SESSION_FILE
+    if os.path.exists(session_file):
         try:
-            d = json.load(open(SESSION_FILE, 'r'))
-            age = time.time() - d.get('saved_at', 0)
+            with open(session_file, 'r', encoding='utf-8') as f:
+                d = json.load(f)
+            saved = d.get('saved_at', 0)
+            age = time.time() - saved if isinstance(saved, (int, float)) else 0
             return jsonify({'has_session': True, 'age_minutes': round(age/60,1)})
         except:
             pass
@@ -234,10 +268,16 @@ def api_session_check():
 
 @app.route('/api/session/load', methods=['POST'])
 def api_session_load():
-    jw = JW_Session()
-    if jw.load_session():
-        sessions[_uid()] = (jw, CourseManager(jw))
-        return jsonify({'ok': True})
+    session_file = _forced_session_file or (
+        SESSION_WEBVPN if os.path.exists(SESSION_WEBVPN) else SESSION_FILE
+    )
+    for candidate in [session_file, SESSION_FILE]:
+        if candidate != session_file and not os.path.exists(candidate):
+            continue
+        jw = JW_Session(session_file=candidate)
+        if jw.load_session():
+            sessions[_uid()] = (jw, CourseManager(jw))
+            return jsonify({'ok': True})
     return jsonify({'ok': False, 'error': 'Session expired'})
 
 @app.route('/api/schedule', methods=['POST'])
@@ -248,9 +288,17 @@ def api_schedule():
     d = request.json or {}
     try:
         r = jw.get_schedule(d.get('xnm','2026'), d.get('xqm','3'))
-        return jsonify({'ok': True, 'schedule': r.get('schedule',[])})
+        out = {'ok': True, 'schedule': r.get('schedule', [])}
+        for key in ('html_len', 'tables'):
+            if key in r:
+                out[key] = r[key]
+        from ics_gen import schedule_to_events
+        out['courses'] = schedule_to_events(r.get('schedule', []))
+        return jsonify(out)
+    except ScheduleError as e:
+        return jsonify({'ok': False, 'error': str(e), 'code': e.code, **e.extra})
     except Exception as e:
-        return jsonify({'ok': False, 'error': str(e)})
+        return jsonify({'ok': False, 'error': str(e), 'code': 'query_failed'})
 
 @app.route('/api/exams', methods=['POST'])
 def api_exams():
@@ -266,13 +314,18 @@ def api_exams():
 
 @app.route('/api/schedule-ics', methods=['GET'])
 def api_schedule_ics():
-    path = r'G:\桌面\大二上.ics'
-    if not os.path.exists(path):
-        return jsonify({'ok': False, 'error': 'ics not found'})
+    jw, cm = _cm()
+    if not jw:
+        return jsonify({'ok': False, 'error': 'Not logged in'})
     try:
-        return jsonify({'ok': True, 'courses': parse_ics(path)})
+        from ics_gen import schedule_to_events
+        r = jw.get_schedule(request.args.get('xnm', '2026'), request.args.get('xqm', '3'))
+        events = schedule_to_events(r.get('schedule', []))
+        return jsonify({'ok': True, 'courses': events})
+    except ScheduleError as e:
+        return jsonify({'ok': False, 'error': str(e), 'code': e.code, **e.extra})
     except Exception as e:
-        return jsonify({'ok': False, 'error': str(e)})
+        return jsonify({'ok': False, 'error': str(e), 'code': 'query_failed'})
 
 @app.route('/api/scores', methods=['POST'])
 def api_scores():
